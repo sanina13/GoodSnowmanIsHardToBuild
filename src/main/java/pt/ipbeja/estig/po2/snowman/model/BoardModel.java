@@ -1,6 +1,7 @@
 package pt.ipbeja.estig.po2.snowman.model;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import pt.ipbeja.estig.po2.snowman.gui.GameView;
@@ -57,10 +58,34 @@ public class BoardModel extends Application {
             case RIGHT -> newCol++;
         }
 
-        //Colocar Validação
+        //Colocar Validação VALIDAÇÃO COLOCA DIA 16 A NOITE IGUAL AO GROWSNOWBALL
         monster.setPosition(newRow, newCol);
         System.out.println("Movido para linha " + newRow + " e coluna " + newCol);
     }
+
+    public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
+        int newRow = snowball.getRow();
+        int newCol = snowball.getCol();
+
+        switch (direction){
+            case UP -> newRow--;
+            case DOWN -> newRow++;
+            case LEFT -> newCol--;
+            case RIGHT -> newCol++;
+        }
+
+        if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS){
+            if(board.get(newRow).get(newCol) == PositionContent.SNOW){
+                switch (snowball.getType()){
+                    case SMALL -> snowball.setType(SnowballType.AVERAGE);
+                    case AVERAGE -> snowball.setType(SnowballType.BIG);
+                    default -> {}
+                }
+                snowball.setPosition(newRow, newCol);
+            }
+        }
+    }
+
 
     public List<List<PositionContent>> getBoard() {
         return board;
@@ -75,6 +100,7 @@ public class BoardModel extends Application {
     public void start(Stage primaryStage) {
         initModel(); // inicializa o tabuleiro
         testMonsterToTheLeft();
+        testCreateAverageSnowball();
         GameView view = new GameView(this);
         Scene scene = new Scene(view.createContent());
 
@@ -111,7 +137,17 @@ public class BoardModel extends Application {
     }
 
     void testCreateAverageSnowball(){
+        Snowball snowball = new Snowball(3, 3, SnowballType.SMALL);
+        snowballs = new ArrayList<>();
+        snowballs.add(snowball);
+        board.get(3).set(4, PositionContent.SNOW);
+        growSnowballIfOnSnow(snowball, Direction.RIGHT);
 
+        if(snowball.getType() == SnowballType.AVERAGE){
+            System.out.println("testCreateAverageSnowball passed!");
+        }else{
+            System.out.println("testCreateAverageSnowball failed");
+        }
     }
 
     void testCreateBigSnowball(){
