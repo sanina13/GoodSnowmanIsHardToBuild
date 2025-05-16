@@ -13,6 +13,7 @@ public class BoardModel extends Application {
 
     private  Monster monster;
     private List<List<PositionContent>> board;
+    private List<Snowball> snowballs;
     public static final int ROWS = 10;
     public static final int COLS = 10;
 
@@ -31,10 +32,15 @@ public class BoardModel extends Application {
             board.add(row);
         }
 
-        // Exemplo
+        // Exemplo de pos inicial
         board.get(2).set(3, PositionContent.SNOWMAN);
         board.get(4).set(5, PositionContent.BLOCK);
         board.get(1).set(1, PositionContent.SNOW);
+
+        // Iniciar snowballs
+        snowballs = new ArrayList<>();
+        snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
+        snowballs.add(new Snowball(5, 5, SnowballType.AVERAGE));
     }
 
     public void moveMonster(Direction direction){
@@ -58,6 +64,10 @@ public class BoardModel extends Application {
 
     public List<List<PositionContent>> getBoard() {
         return board;
+    }
+
+    public  List<Snowball> getSnowballs(){
+        return snowballs;
     }
 
 
