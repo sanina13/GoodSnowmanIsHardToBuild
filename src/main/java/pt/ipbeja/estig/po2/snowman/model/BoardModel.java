@@ -74,6 +74,7 @@ public class BoardModel extends Application {
     @Override
     public void start(Stage primaryStage) {
         initModel(); // inicializa o tabuleiro
+        testMonsterToTheLeft();
         GameView view = new GameView(this);
         Scene scene = new Scene(view.createContent());
 
@@ -99,7 +100,14 @@ public class BoardModel extends Application {
     //Tests
 
     void testMonsterToTheLeft(){
+        this.monster.setPosition(4, 4);
+        moveMonster(Direction.LEFT);
 
+        if (this.monster.getCol() == 3){
+            System.out.println("Monster move to the Left passed!");
+        }else {
+            System.out.println("Monster dont move to the Left!");
+        }
     }
 
     void testCreateAverageSnowball(){
