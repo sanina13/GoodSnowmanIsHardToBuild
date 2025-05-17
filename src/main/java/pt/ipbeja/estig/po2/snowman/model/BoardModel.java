@@ -99,8 +99,12 @@ public class BoardModel extends Application {
     @Override
     public void start(Stage primaryStage) {
         initModel(); // inicializa o tabuleiro
+
+        //Test methods
         testMonsterToTheLeft();
         testCreateAverageSnowball();
+        testCreateBigSnowball();
+
         GameView view = new GameView(this);
         Scene scene = new Scene(view.createContent());
 
@@ -151,6 +155,17 @@ public class BoardModel extends Application {
     }
 
     void testCreateBigSnowball(){
+        Snowball snowball = new Snowball(4, 4, SnowballType.AVERAGE);
+        snowballs = new ArrayList<>();
+        snowballs.add(snowball);
+        board.get(4).set(3, PositionContent.SNOW);
+        growSnowballIfOnSnow(snowball, Direction.LEFT);
+
+        if(snowball.getType() == SnowballType.BIG){
+            System.out.println("testCreateBigSnowball passed!");
+        }else{
+            System.out.println("testCreateBigSnowball failed!");
+        }
 
     }
 
