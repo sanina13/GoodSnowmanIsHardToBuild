@@ -7,6 +7,7 @@ import javafx.stage.Stage;
 import pt.ipbeja.estig.po2.snowman.gui.GameView;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -43,6 +44,7 @@ public class BoardModel extends Application {
         snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
         snowballs.add(new Snowball(5, 5, SnowballType.AVERAGE));
     }
+
 
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
@@ -86,6 +88,50 @@ public class BoardModel extends Application {
         }
     }
 
+    private Snowball getSnowballAt(int row, int col) {
+        for (Snowball s : snowballs) {
+            if (s.getRow() == row && s.getCol() == col) {
+                return s;
+            }
+        }
+        return null;
+    }
+
+
+    public void tryStackSnowball(Snowball mover, Direction direction){
+        int newRow = mover.getRow();
+        int newCol = mover.getCol();
+        Snowball targetSnowball = getSnowballAt(newRow, newCol);
+
+        switch (direction){
+            case UP -> newRow--;
+            case DOWN -> newRow++;
+            case LEFT -> newCol--;
+            case RIGHT -> newCol++;
+        }
+
+        if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < 10){
+            if(targetSnowball != null){
+                switch (mover.getType()){
+                    case AVERAGE -> {
+                        if(targetSnowball.getType() == SnowballType.BIG){
+                            targetSnowball.setType(SnowballType.BIG_AVERAGE);
+                            snowballs.remove(mover);
+                        }
+                    }
+                    case SMALL -> {
+                        if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
+                            board.get(newRow).set(newCol, PositionContent.SNOWMAN);
+                            snowballs.remove(targetSnowball);
+                            snowballs.remove(mover);
+                        }
+                    }
+                }
+            }
+        }
+
+    }
+
 
     public List<List<PositionContent>> getBoard() {
         return board;
@@ -104,6 +150,7 @@ public class BoardModel extends Application {
         testMonsterToTheLeft();
         testCreateAverageSnowball();
         testCreateBigSnowball();
+        testMaintainBigSnowball();
 
         GameView view = new GameView(this);
         Scene scene = new Scene(view.createContent());
@@ -170,10 +217,29 @@ public class BoardModel extends Application {
     }
 
     void testMaintainBigSnowball(){
+        Snowball snowball = new Snowball(3, 3, SnowballType.BIG);
+        snowballs = new ArrayList<>();
+        snowballs.add(snowball);
+        board.get(3).set(4, PositionContent.SNOW);
+        growSnowballIfOnSnow(snowball, Direction.RIGHT);
+
+        if(snowball.getType() == SnowballType.BIG){
+            System.out.println("testMaintainBigSnowball passed!");
+        }else{
+            System.out.println("testMaintainBigSnowball failed!");
+        }
+
 
     }
 
     void testAverageBigSnowman(){
+        Snowball snowballAvg = new Snowball(5, 5, SnowballType.AVERAGE);
+        Snowball snowballBig = new Snowball(5, 6, SnowballType.BIG);
+
+        snowballs = new ArrayList<>();
+        snowballs.addAll(Arrays.asList(snowballAvg, snowballBig));
+
+        growSnowballIfOnSnow(snowballAvg, Direction.RIGHT);
 
     }
 
