@@ -1,7 +1,6 @@
 package pt.ipbeja.estig.po2.snowman.model;
 
 import javafx.application.Application;
-import javafx.geometry.Pos;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import pt.ipbeja.estig.po2.snowman.gui.GameView;
@@ -101,7 +100,7 @@ public class BoardModel extends Application {
     public void tryStackSnowball(Snowball mover, Direction direction){
         int newRow = mover.getRow();
         int newCol = mover.getCol();
-        Snowball targetSnowball = getSnowballAt(newRow, newCol);
+
 
         switch (direction){
             case UP -> newRow--;
@@ -109,6 +108,8 @@ public class BoardModel extends Application {
             case LEFT -> newCol--;
             case RIGHT -> newCol++;
         }
+
+        Snowball targetSnowball = getSnowballAt(newRow, newCol);
 
         if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < 10){
             if(targetSnowball != null){
@@ -125,6 +126,10 @@ public class BoardModel extends Application {
                             snowballs.remove(targetSnowball);
                             snowballs.remove(mover);
                         }
+                    }
+
+                    default -> {
+                        // Outros casos que não provoca nada...
                     }
                 }
             }
@@ -151,6 +156,8 @@ public class BoardModel extends Application {
         testCreateAverageSnowball();
         testCreateBigSnowball();
         testMaintainBigSnowball();
+        testAverageBigSnowman();
+        testCompleteSnowman();
 
         GameView view = new GameView(this);
         Scene scene = new Scene(view.createContent());
@@ -180,11 +187,7 @@ public class BoardModel extends Application {
         this.monster.setPosition(4, 4);
         moveMonster(Direction.LEFT);
 
-        if (this.monster.getCol() == 3){
-            System.out.println("Monster move to the Left passed!");
-        }else {
-            System.out.println("Monster dont move to the Left!");
-        }
+        assert this.monster.getCol() == 3 : "Monster didn't move to the left";
     }
 
     void testCreateAverageSnowball(){
@@ -194,11 +197,7 @@ public class BoardModel extends Application {
         board.get(3).set(4, PositionContent.SNOW);
         growSnowballIfOnSnow(snowball, Direction.RIGHT);
 
-        if(snowball.getType() == SnowballType.AVERAGE){
-            System.out.println("testCreateAverageSnowball passed!");
-        }else{
-            System.out.println("testCreateAverageSnowball failed");
-        }
+        assert  snowball.getType() == SnowballType.AVERAGE : "Expected Average got " + snowball.getType();
     }
 
     void testCreateBigSnowball(){
@@ -208,12 +207,7 @@ public class BoardModel extends Application {
         board.get(4).set(3, PositionContent.SNOW);
         growSnowballIfOnSnow(snowball, Direction.LEFT);
 
-        if(snowball.getType() == SnowballType.BIG){
-            System.out.println("testCreateBigSnowball passed!");
-        }else{
-            System.out.println("testCreateBigSnowball failed!");
-        }
-
+        assert  snowball.getType() == SnowballType.BIG : "Expected Big got " + snowball.getType();
     }
 
     void testMaintainBigSnowball(){
@@ -223,13 +217,7 @@ public class BoardModel extends Application {
         board.get(3).set(4, PositionContent.SNOW);
         growSnowballIfOnSnow(snowball, Direction.RIGHT);
 
-        if(snowball.getType() == SnowballType.BIG){
-            System.out.println("testMaintainBigSnowball passed!");
-        }else{
-            System.out.println("testMaintainBigSnowball failed!");
-        }
-
-
+        assert  snowball.getType() == SnowballType.BIG : "Expected Big got " + snowball.getType();
     }
 
     void testAverageBigSnowman(){
@@ -239,11 +227,20 @@ public class BoardModel extends Application {
         snowballs = new ArrayList<>();
         snowballs.addAll(Arrays.asList(snowballAvg, snowballBig));
 
-        growSnowballIfOnSnow(snowballAvg, Direction.RIGHT);
+        tryStackSnowball(snowballAvg, Direction.RIGHT);
 
+        assert snowballBig.getType() == SnowballType.BIG_AVERAGE : "Expected BIG_AVERAGE got " + snowballBig.getType();
     }
 
     void testCompleteSnowman(){
+        Snowball snowballSmall = new Snowball(3, 3, SnowballType.SMALL);
+        Snowball snowballBigAvg = new Snowball(3, 4, SnowballType.BIG_AVERAGE);
 
+        snowballs = new ArrayList<>();
+        snowballs.addAll(Arrays.asList(snowballSmall, snowballBigAvg));
+
+        tryStackSnowball(snowballSmall, Direction.RIGHT);
+
+        assert board.get(3).get(4) == PositionContent.SNOWMAN : "Expected Snowman got " + board.get(3).get(4);
     }
 }
