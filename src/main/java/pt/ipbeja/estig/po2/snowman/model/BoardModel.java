@@ -12,7 +12,7 @@ import java.util.List;
 
 public class BoardModel extends Application {
     private GameView view;
-    private  Monster monster;
+    private Monster monster;
     private List<List<PositionContent>> board;
     private List<Snowball> snowballs;
     private List<String> movementsHistory;
@@ -53,6 +53,7 @@ public class BoardModel extends Application {
         snowballs.add(new Snowball(5, 5, SnowballType.AVERAGE));
     }
 
+    //Monster Methods
 
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
@@ -86,6 +87,8 @@ public class BoardModel extends Application {
 
     }
 
+    //Snowball Methods
+
     public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
         int newRow = snowball.getRow();
         int newCol = snowball.getCol();
@@ -117,7 +120,6 @@ public class BoardModel extends Application {
         }
         return null;
     }
-
 
     public void tryStackSnowball(Snowball mover, Direction direction){
         int newRow = mover.getRow();
@@ -159,7 +161,7 @@ public class BoardModel extends Application {
 
     }
 
-
+    //getters
     public List<List<PositionContent>> getBoard() {
         return board;
     }
@@ -172,13 +174,17 @@ public class BoardModel extends Application {
         return movementsHistory;
     }
 
+    public Monster getMonster(){
+        return this.monster;
+    }
 
+    //Strat methods
     @Override
     public void start(Stage primaryStage) {
         initModel(); // inicializa o tabuleiro
 
         //Test methods
-        testMonsterToTheLeft();
+        //testMonsterToTheLeft();
         testCreateAverageSnowball();
         testCreateBigSnowball();
         testMaintainBigSnowball();
@@ -208,6 +214,7 @@ public class BoardModel extends Application {
     public static void main(String[] args) {
         launch(args); // chama JavaFX
     }
+
 
     //Tests
 

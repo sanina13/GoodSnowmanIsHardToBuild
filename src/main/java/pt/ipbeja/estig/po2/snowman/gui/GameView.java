@@ -17,6 +17,7 @@ public class GameView {
     private TextArea movesArea;
 
 
+
     public GameView(BoardModel boardModel) {
         this.boardModel = boardModel;
     }
@@ -30,21 +31,31 @@ public class GameView {
             List<PositionContent> line = board.get(row);
             for (int col = 0; col < line.size(); col++) {
                 PositionContent content = line.get(col);
-                Rectangle tile = new Rectangle(TILE_SIZE, TILE_SIZE);
-                tile.setStroke(Color.BLACK);
-
-                switch (content){
-                    case NO_SNOW -> tile.setFill(Color.LIGHTGRAY);
-                    case SNOW -> tile.setFill(Color.WHITE);
-                    case BLOCK -> tile.setFill(Color.BROWN);
-                    case SNOWMAN -> tile.setFill(Color.LIGHTBLUE);
-                }
+                Rectangle tile = getRectangle(row, col, content);
 
                 StackPane cell = new StackPane(tile);
                 grid.add(cell, col, row);
             }
         }
         return grid;
+    }
+
+    private Rectangle getRectangle(int row, int col, PositionContent content) {
+        Rectangle tile = new Rectangle(TILE_SIZE, TILE_SIZE);
+        tile.setStroke(Color.BLACK);
+
+        int monsterRow = boardModel.getMonster().getRow();
+        int monsterCol = boardModel.getMonster().getCol();
+        if(row ==  monsterRow && col == monsterCol){
+            tile.setFill(Color.RED);
+        }
+        switch (content){
+            case NO_SNOW -> tile.setFill(Color.LIGHTGRAY);
+            case SNOW -> tile.setFill(Color.WHITE);
+            case BLOCK -> tile.setFill(Color.BROWN);
+            case SNOWMAN -> tile.setFill(Color.LIGHTBLUE);
+        }
+        return tile;
     }
 
     public TextArea createMovesArea(){
