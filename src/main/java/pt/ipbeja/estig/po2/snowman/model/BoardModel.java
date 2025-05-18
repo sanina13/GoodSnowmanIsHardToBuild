@@ -15,6 +15,7 @@ public class BoardModel extends Application {
     private  Monster monster;
     private List<List<PositionContent>> board;
     private List<Snowball> snowballs;
+    private List<String> movementsHistory;
     public static final int ROWS = 10;
     public static final int COLS = 10;
 
@@ -24,7 +25,12 @@ public class BoardModel extends Application {
     }
 
     public void initModel() {
+
         board = new ArrayList<>();
+
+        //cria Lista de Historico de movimentos
+        movementsHistory = new ArrayList<>();
+
         for (int i = 0; i < ROWS; i++) {
             List<PositionContent> row = new ArrayList<>();
             for (int j = 0; j < COLS; j++) {
@@ -48,6 +54,9 @@ public class BoardModel extends Application {
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
         int currentCol = monster.getCol();
+        char firstLetter = (char) ('A' + currentCol); // ASCI Se currentCol = 3, faz-se: 'A' + 3 = 65 + 3 = 68
+        String moveResume = "";
+
 
         int newRow = currentRow;
         int newCol = currentCol;
@@ -59,9 +68,14 @@ public class BoardModel extends Application {
             case RIGHT -> newCol++;
         }
 
-        //Colocar Validação VALIDAÇÃO COLOCA DIA 16 A NOITE IGUAL AO GROWSNOWBALL
-        monster.setPosition(newRow, newCol);
-        System.out.println("Movido para linha " + newRow + " e coluna " + newCol);
+        char secondLetter = (char) ('A' + newCol);
+
+        if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS){
+            monster.setPosition(newRow, newCol);
+            moveResume = "(" + currentRow  + ", " + firstLetter + ") -> (" + newRow + ", " + secondLetter + ")";
+            movementsHistory.add(moveResume);
+        }
+
     }
 
     public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
