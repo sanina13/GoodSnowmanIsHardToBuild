@@ -11,7 +11,7 @@ import java.util.List;
 
 
 public class BoardModel extends Application {
-
+    private GameView view;
     private  Monster monster;
     private List<List<PositionContent>> board;
     private List<Snowball> snowballs;
@@ -24,8 +24,11 @@ public class BoardModel extends Application {
         // JavaFX vai usar este construtor vazio, por isso não inicializamos aqui o modelo
     }
 
-    public void initModel() {
+    public void setView(GameView view){
+        this.view = view;
+    }
 
+    public void initModel() {
         board = new ArrayList<>();
 
         //cria Lista de Historico de movimentos
@@ -74,6 +77,11 @@ public class BoardModel extends Application {
             monster.setPosition(newRow, newCol);
             moveResume = "(" + currentRow  + ", " + firstLetter + ") -> (" + newRow + ", " + secondLetter + ")";
             movementsHistory.add(moveResume);
+
+            // colocar os movimentos na interface
+            if (view != null){
+                view.updateMovementsArea();
+            }
         }
 
     }
@@ -160,20 +168,25 @@ public class BoardModel extends Application {
         return snowballs;
     }
 
+    public List<String> getMovementsHistory(){
+        return movementsHistory;
+    }
+
 
     @Override
     public void start(Stage primaryStage) {
         initModel(); // inicializa o tabuleiro
 
         //Test methods
-        testMonsterToTheLeft();
-        testCreateAverageSnowball();
-        testCreateBigSnowball();
-        testMaintainBigSnowball();
-        testAverageBigSnowman();
-        testCompleteSnowman();
+//        testMonsterToTheLeft();
+//        testCreateAverageSnowball();
+//        testCreateBigSnowball();
+//        testMaintainBigSnowball();
+//        testAverageBigSnowman();
+//        testCompleteSnowman();
 
         GameView view = new GameView(this);
+        this.setView(view);
         Scene scene = new Scene(view.createContent());
 
         scene.setOnKeyPressed(event -> {
@@ -189,6 +202,7 @@ public class BoardModel extends Application {
         primaryStage.setTitle("Snowman Game");
         primaryStage.setScene(scene);
         primaryStage.show();
+        scene.getRoot().requestFocus();
     }
 
     public static void main(String[] args) {

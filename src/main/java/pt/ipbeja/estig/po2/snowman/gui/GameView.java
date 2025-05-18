@@ -1,7 +1,9 @@
 package pt.ipbeja.estig.po2.snowman.gui;
 
+import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
 import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
@@ -12,13 +14,15 @@ import java.util.List;
 public class GameView {
     private static final int TILE_SIZE = 40;
     private final BoardModel boardModel;
+    private TextArea movesArea;
 
 
     public GameView(BoardModel boardModel) {
         this.boardModel = boardModel;
     }
 
-    public GridPane createContent(){
+
+    public GridPane createGridPane(){
         GridPane grid = new GridPane();
         List<List<PositionContent>> board = boardModel.getBoard();
 
@@ -40,8 +44,30 @@ public class GameView {
                 grid.add(cell, col, row);
             }
         }
-
         return grid;
+    }
+
+    public TextArea createMovesArea(){
+        this.movesArea = new TextArea();
+        this.movesArea.setEditable(false);
+        this.movesArea.setPrefRowCount(5);
+        this.movesArea.setPrefColumnCount(10);
+        return this.movesArea;
+    }
+
+    public VBox createContent(){
+        GridPane grid = createGridPane();
+        createMovesArea();
+
+        return new VBox(10, grid, this.movesArea);
+    }
+
+    public void updateMovementsArea(){
+        movesArea.clear();
+        List<String> movsList = boardModel.getMovementsHistory();
+        for(String mov : movsList){
+            movesArea.appendText(mov + "\n");
+        }
     }
 
 
