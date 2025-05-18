@@ -8,6 +8,8 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.Rectangle;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
 import pt.ipbeja.estig.po2.snowman.model.PositionContent;
+import pt.ipbeja.estig.po2.snowman.model.Snowball;
+import pt.ipbeja.estig.po2.snowman.model.SnowballType;
 
 import java.util.List;
 
@@ -39,6 +41,8 @@ public class GameView {
                     tile.setFill(Color.BLACK);
                 }
 
+                applySnowballColor(tile, row, col);
+
                 StackPane cell = new StackPane(tile);
                 grid.add(cell, col, row);
             }
@@ -62,6 +66,21 @@ public class GameView {
 
     private boolean isMonsterPosition(int row, int col){
         return row == boardModel.getMonster().getRow() && col == boardModel.getMonster().getCol();
+    }
+
+    private void applySnowballColor(Rectangle tile, int row, int col){
+        Snowball snowball = boardModel.getSnowballAt(row, col);
+
+        if(snowball != null){
+           switch (snowball.getType()){
+               case SMALL -> tile.setFill(Color.PINK);
+               case AVERAGE -> tile.setFill(Color.ORANGE);
+               case BIG -> tile.setFill(Color.RED);
+               case BIG_AVERAGE -> tile.setFill(Color.PURPLE);
+               case BIG_SMALL -> tile.setFill(Color.MAGENTA);
+               case AVERAGE_SMALL -> tile.setFill(Color.DARKORANGE);
+           }
+        }
     }
 
 
@@ -93,6 +112,5 @@ public class GameView {
         this.grid = createGridPane();
         this.layout.getChildren().add(0, this.grid);
     }
-
 
 }

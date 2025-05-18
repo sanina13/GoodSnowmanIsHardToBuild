@@ -50,7 +50,7 @@ public class BoardModel extends Application {
         // Iniciar snowballs
         snowballs = new ArrayList<>();
         snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
-        snowballs.add(new Snowball(5, 5, SnowballType.AVERAGE));
+        snowballs.add(new Snowball(5, 6, SnowballType.AVERAGE));
     }
 
     //Monster Methods
@@ -58,35 +58,38 @@ public class BoardModel extends Application {
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
         int currentCol = monster.getCol();
-        char firstLetter = (char) ('A' + currentCol); // ASCI Se currentCol = 3, faz-se: 'A' + 3 = 65 + 3 = 68
-        String moveResume = "";
+        int[] next = calculateNextPositon(currentRow, currentCol, direction);
+        int newRow = next[0];
+        int newCol = next[1];
+
+        if(!(isInsideBoard(newRow, newCol))) return;
+        if(board.get(newRow).get(newCol) == PositionContent.BLOCK) return;
 
 
-        int newRow = currentRow;
-        int newCol = currentCol;
 
-        switch (direction){
-            case UP -> newRow--;
-            case DOWN -> newRow++;
-            case LEFT -> newCol--;
-            case RIGHT -> newCol++;
+        Snowball snowball = getSnowballAt(newRow, newCol);
+        if (snowball == null){
+            moveMonsterTo(currentRow, currentCol, newRow, newCol);
+        } else{
+            // se Tiver snowball
         }
-
-        char secondLetter = (char) ('A' + newCol);
-
-        if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS){
-            monster.setPosition(newRow, newCol);
-            moveResume = "(" + currentRow  + ", " + firstLetter + ") -> (" + newRow + ", " + secondLetter + ")";
-            movementsHistory.add(moveResume);
-
-            // colocar os movimentos na interface
-            if (view != null){
-                view.updateMovementsArea();
-                view.refreshBoard();
-            }
-        }
-
     }
+
+    private void moveMonsterTo(int currentRow, int currentCol, int newRow, int newCol) {
+        monster.setPosition(newRow, newCol);
+        char firstLetter = (char) ('A' + currentCol); // ASCI Se currentCol = 3, faz-se: 'A' + 3 = 65 + 3 = 68
+        char secondLetter = (char) ('A' + newCol);
+        String moveResume = "(" + currentRow + ", " + firstLetter + ") -> (" + newRow + ", " + secondLetter + ")";
+        movementsHistory.add(moveResume);
+        // colocar os movimentos na interface
+        if (view != null) {
+            view.updateMovementsArea();
+            view.refreshBoard();
+
+        }
+    }
+
+
 
     //Snowball Methods
 
@@ -113,7 +116,7 @@ public class BoardModel extends Application {
         }
     }
 
-    private Snowball getSnowballAt(int row, int col) {
+    public Snowball getSnowballAt(int row, int col) {
         for (Snowball s : snowballs) {
             if (s.getRow() == row && s.getCol() == col) {
                 return s;
@@ -162,6 +165,22 @@ public class BoardModel extends Application {
 
     }
 
+    //Helpful methods
+    private int[] calculateNextPositon(int row, int col, Direction direction){
+        return switch (direction) {
+            case UP -> new int[]{row - 1, col};
+            case DOWN -> new int[]{row + 1, col};
+            case RIGHT -> new int[]{row, col + 1};
+            case LEFT -> new int[]{row, col - 1};
+        };
+    }
+
+    private boolean isInsideBoard(int row, int col){
+        return row >= 0 && row < ROWS && col >= 0 && col < COLS;
+    }
+
+
+
     //getters
     public List<List<PositionContent>> getBoard() {
         return board;
@@ -186,11 +205,11 @@ public class BoardModel extends Application {
 
         //Test methods
         //testMonsterToTheLeft();
-        testCreateAverageSnowball();
-        testCreateBigSnowball();
-        testMaintainBigSnowball();
-        testAverageBigSnowman();
-        testCompleteSnowman();
+//       testCreateAverageSnowball();
+//       testCreateBigSnowball();
+//       testMaintainBigSnowball();
+//       testAverageBigSnowman();
+//       testCompleteSnowman();
 
         GameView view = new GameView(this);
         this.setView(view);
