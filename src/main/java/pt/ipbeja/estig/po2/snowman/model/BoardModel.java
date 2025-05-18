@@ -178,12 +178,12 @@ public class BoardModel extends Application {
         initModel(); // inicializa o tabuleiro
 
         //Test methods
-//        testMonsterToTheLeft();
-//        testCreateAverageSnowball();
-//        testCreateBigSnowball();
-//        testMaintainBigSnowball();
-//        testAverageBigSnowman();
-//        testCompleteSnowman();
+        testMonsterToTheLeft();
+        testCreateAverageSnowball();
+        testCreateBigSnowball();
+        testMaintainBigSnowball();
+        testAverageBigSnowman();
+        testCompleteSnowman();
 
         GameView view = new GameView(this);
         this.setView(view);

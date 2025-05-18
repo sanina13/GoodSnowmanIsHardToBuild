@@ -36,7 +36,7 @@ public class GameView {
                 switch (content){
                     case NO_SNOW -> tile.setFill(Color.LIGHTGRAY);
                     case SNOW -> tile.setFill(Color.WHITE);
-                    case BLOCK -> tile.setFill(Color.DARKGRAY);
+                    case BLOCK -> tile.setFill(Color.BROWN);
                     case SNOWMAN -> tile.setFill(Color.LIGHTBLUE);
                 }
 
