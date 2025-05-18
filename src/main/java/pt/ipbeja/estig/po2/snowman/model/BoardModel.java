@@ -82,6 +82,7 @@ public class BoardModel extends Application {
             // colocar os movimentos na interface
             if (view != null){
                 view.updateMovementsArea();
+                view.refreshBoard();
             }
         }
 

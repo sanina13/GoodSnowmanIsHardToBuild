@@ -15,6 +15,8 @@ public class GameView {
     private static final int TILE_SIZE = 40;
     private final BoardModel boardModel;
     private TextArea movesArea;
+    private VBox layout;
+    private GridPane grid;
 
 
 
@@ -31,7 +33,11 @@ public class GameView {
             List<PositionContent> line = board.get(row);
             for (int col = 0; col < line.size(); col++) {
                 PositionContent content = line.get(col);
-                Rectangle tile = getRectangle(row, col, content);
+                Rectangle tile = createTile(content);
+
+                if(isMonsterPosition(row, col)){
+                    tile.setFill(Color.BLACK);
+                }
 
                 StackPane cell = new StackPane(tile);
                 grid.add(cell, col, row);
@@ -40,23 +46,24 @@ public class GameView {
         return grid;
     }
 
-    private Rectangle getRectangle(int row, int col, PositionContent content) {
+    private Rectangle createTile(PositionContent content){
         Rectangle tile = new Rectangle(TILE_SIZE, TILE_SIZE);
         tile.setStroke(Color.BLACK);
 
-        int monsterRow = boardModel.getMonster().getRow();
-        int monsterCol = boardModel.getMonster().getCol();
-        if(row ==  monsterRow && col == monsterCol){
-            tile.setFill(Color.RED);
-        }
         switch (content){
             case NO_SNOW -> tile.setFill(Color.LIGHTGRAY);
             case SNOW -> tile.setFill(Color.WHITE);
             case BLOCK -> tile.setFill(Color.BROWN);
             case SNOWMAN -> tile.setFill(Color.LIGHTBLUE);
         }
+
         return tile;
     }
+
+    private boolean isMonsterPosition(int row, int col){
+        return row == boardModel.getMonster().getRow() && col == boardModel.getMonster().getCol();
+    }
+
 
     public TextArea createMovesArea(){
         this.movesArea = new TextArea();
@@ -67,10 +74,10 @@ public class GameView {
     }
 
     public VBox createContent(){
-        GridPane grid = createGridPane();
+        this.grid = createGridPane();
         createMovesArea();
-
-        return new VBox(10, grid, this.movesArea);
+        this.layout = new VBox(10, this.grid, this.movesArea);
+        return this.layout;
     }
 
     public void updateMovementsArea(){
@@ -79,6 +86,12 @@ public class GameView {
         for(String mov : movsList){
             movesArea.appendText(mov + "\n");
         }
+    }
+
+    public void refreshBoard(){
+        this.layout.getChildren().remove(this.grid);
+        this.grid = createGridPane();
+        this.layout.getChildren().add(0, this.grid);
     }
 
 
