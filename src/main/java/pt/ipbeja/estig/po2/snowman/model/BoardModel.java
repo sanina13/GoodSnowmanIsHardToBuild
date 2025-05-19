@@ -89,6 +89,7 @@ public class BoardModel extends Application {
                 moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }else {
                 tryStackSnowball(snowball, direction);
+                moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }
         }
     }
@@ -106,7 +107,6 @@ public class BoardModel extends Application {
 
         }
     }
-
 
 
     //Snowball Methods
@@ -180,7 +180,6 @@ public class BoardModel extends Application {
         };
     }
 
-
     private boolean isInsideBoard(int row, int col){
         return row >= 0 && row < ROWS && col >= 0 && col < COLS;
     }
@@ -189,7 +188,6 @@ public class BoardModel extends Application {
         if(!(isInsideBoard(row, col))) return true;
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
     }
-
 
 
     //getters
