@@ -64,9 +64,7 @@ public class BoardModel extends Application {
         int newRow = next[0];
         int newCol = next[1];
 
-        if(!(isInsideBoard(newRow, newCol))) return;
-
-        if(board.get(newRow).get(newCol) == PositionContent.BLOCK || board.get(newRow).get(newCol) == PositionContent.SNOWMAN) return;
+        if (checkConditons(newRow, newCol)) return;
 
         Snowball snowball = getSnowballAt(newRow, newCol);
 
@@ -82,10 +80,9 @@ public class BoardModel extends Application {
             int[] after = calculateNextPositon(newRow, newCol, direction);
             int afterRow = after[0] , afterCol = after[1];
 
-            if(!(isInsideBoard(afterRow, afterCol))) return;
-            if(board.get(afterRow).get(afterCol) == PositionContent.BLOCK || board.get(afterRow).get(afterCol) == PositionContent.SNOWMAN) return;
+            if(checkConditons(afterRow, afterCol)) return;
 
-            Snowball snowballCheck = getSnowballAt(afterRow, afterCol);
+            Snowball snowballCheck = getSnowballAt(afterRow, afterCol); //--
 
             if (snowballCheck == null){
                 snowball.setPosition(afterRow, afterCol);
@@ -186,6 +183,11 @@ public class BoardModel extends Application {
 
     private boolean isInsideBoard(int row, int col){
         return row >= 0 && row < ROWS && col >= 0 && col < COLS;
+    }
+
+    private boolean checkConditons(int row, int col){
+        if(!(isInsideBoard(row, col))) return true;
+        return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
     }
 
 
