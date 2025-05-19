@@ -51,6 +51,8 @@ public class BoardModel extends Application {
         snowballs = new ArrayList<>();
         snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
         snowballs.add(new Snowball(5, 6, SnowballType.AVERAGE));
+        snowballs.add(new Snowball(5, 7, SnowballType.BIG_AVERAGE));
+        snowballs.add(new Snowball(3, 7, SnowballType.BIG));
     }
 
     //Monster Methods
@@ -63,15 +65,34 @@ public class BoardModel extends Application {
         int newCol = next[1];
 
         if(!(isInsideBoard(newRow, newCol))) return;
-        if(board.get(newRow).get(newCol) == PositionContent.BLOCK) return;
 
-
+        if(board.get(newRow).get(newCol) == PositionContent.BLOCK || board.get(newRow).get(newCol) == PositionContent.SNOWMAN) return;
 
         Snowball snowball = getSnowballAt(newRow, newCol);
+
         if (snowball == null){
-            moveMonsterTo(currentRow, currentCol, newRow, newCol);
+            if(board.get(newRow).get(newCol) == PositionContent.SNOW){
+                snowballs.add(new Snowball(newRow, newCol, SnowballType.SMALL));
+                return;
+            }else{
+                moveMonsterTo(currentRow, currentCol, newRow, newCol);
+            }
         } else{
             // se Tiver snowball
+            int[] after = calculateNextPositon(newRow, newCol, direction);
+            int afterRow = after[0] , afterCol = after[1];
+
+            if(!(isInsideBoard(afterRow, afterCol))) return;
+            if(board.get(afterRow).get(afterCol) == PositionContent.BLOCK || board.get(afterRow).get(afterCol) == PositionContent.SNOWMAN) return;
+
+            Snowball snowballCheck = getSnowballAt(afterRow, afterCol);
+
+            if (snowballCheck == null){
+                snowball.setPosition(afterRow, afterCol);
+                moveMonsterTo(currentRow, currentCol, newRow, newCol);
+            }else {
+                tryStackSnowball(snowball, direction);
+            }
         }
     }
 
@@ -94,26 +115,21 @@ public class BoardModel extends Application {
     //Snowball Methods
 
     public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
-        int newRow = snowball.getRow();
-        int newCol = snowball.getCol();
+        int[] next = calculateNextPositon(snowball.getRow(), snowball.getCol(), direction);
+        int newRow = next[0];
+        int newCol = next[1];
 
-        switch (direction){
-            case UP -> newRow--;
-            case DOWN -> newRow++;
-            case LEFT -> newCol--;
-            case RIGHT -> newCol++;
-        }
+        if(!isInsideBoard(newRow, newCol)) return;
 
-        if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < COLS){
-            if(board.get(newRow).get(newCol) == PositionContent.SNOW){
-                switch (snowball.getType()){
-                    case SMALL -> snowball.setType(SnowballType.AVERAGE);
-                    case AVERAGE -> snowball.setType(SnowballType.BIG);
-                    default -> {}
-                }
-                snowball.setPosition(newRow, newCol);
+        if(board.get(newRow).get(newCol) == PositionContent.SNOW){
+            switch (snowball.getType()){
+                case SMALL -> snowball.setType(SnowballType.AVERAGE);
+                case AVERAGE -> snowball.setType(SnowballType.BIG);
+                default -> {}
             }
+            snowball.setPosition(newRow, newCol);
         }
+
     }
 
     public Snowball getSnowballAt(int row, int col) {
@@ -126,43 +142,35 @@ public class BoardModel extends Application {
     }
 
     public void tryStackSnowball(Snowball mover, Direction direction){
-        int newRow = mover.getRow();
-        int newCol = mover.getCol();
+        int[] next = calculateNextPositon(mover.getRow(), mover.getCol(), direction);
+        int newRow = next[0];
+        int newCol = next[1];
 
-
-        switch (direction){
-            case UP -> newRow--;
-            case DOWN -> newRow++;
-            case LEFT -> newCol--;
-            case RIGHT -> newCol++;
-        }
+        if(!isInsideBoard(newRow, newCol)) return;
 
         Snowball targetSnowball = getSnowballAt(newRow, newCol);
 
-        if(newRow >= 0 && newRow < ROWS && newCol >= 0 && newCol < 10){
-            if(targetSnowball != null){
-                switch (mover.getType()){
-                    case AVERAGE -> {
-                        if(targetSnowball.getType() == SnowballType.BIG){
-                            targetSnowball.setType(SnowballType.BIG_AVERAGE);
-                            snowballs.remove(mover);
-                        }
+        if(targetSnowball != null){
+            switch (mover.getType()){
+                case AVERAGE -> {
+                    if(targetSnowball.getType() == SnowballType.BIG){
+                        targetSnowball.setType(SnowballType.BIG_AVERAGE);
+                        snowballs.remove(mover);
                     }
-                    case SMALL -> {
-                        if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
-                            board.get(newRow).set(newCol, PositionContent.SNOWMAN);
-                            snowballs.remove(targetSnowball);
-                            snowballs.remove(mover);
-                        }
+                }
+                case SMALL -> {
+                    if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
+                        board.get(newRow).set(newCol, PositionContent.SNOWMAN);
+                        snowballs.remove(targetSnowball);
+                        snowballs.remove(mover);
                     }
+                }
 
-                    default -> {
-                        // Outros casos que não provoca nada...
-                    }
+                default -> {
+                    // Outros casos que não provoca nada...
                 }
             }
         }
-
     }
 
     //Helpful methods
@@ -174,6 +182,7 @@ public class BoardModel extends Application {
             case LEFT -> new int[]{row, col - 1};
         };
     }
+
 
     private boolean isInsideBoard(int row, int col){
         return row >= 0 && row < ROWS && col >= 0 && col < COLS;
