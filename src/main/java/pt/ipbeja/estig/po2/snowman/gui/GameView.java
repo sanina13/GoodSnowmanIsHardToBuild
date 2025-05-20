@@ -1,5 +1,6 @@
 package pt.ipbeja.estig.po2.snowman.gui;
 
+import javafx.scene.control.Alert;
 import javafx.scene.control.TextArea;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
@@ -111,6 +112,14 @@ public class GameView {
         this.layout.getChildren().remove(this.grid);
         this.grid = createGridPane();
         this.layout.getChildren().add(0, this.grid);
+    }
+
+    public void gameWon(){
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("You win!");
+        alert.setHeaderText(null);
+        alert.setContentText("Congratulations! You’ve built a complete snowman!");
+        alert.showAndWait();
     }
 
 }

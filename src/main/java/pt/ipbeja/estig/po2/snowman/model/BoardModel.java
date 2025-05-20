@@ -5,6 +5,11 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import pt.ipbeja.estig.po2.snowman.gui.GameView;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -158,6 +163,8 @@ public class BoardModel extends Application {
                 case SMALL -> {
                     if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
                         board.get(newRow).set(newCol, PositionContent.SNOWMAN);
+                        view.gameWon();
+                        saveSnowmanToFile(newRow, newCol);
                         snowballs.remove(targetSnowball);
                         snowballs.remove(mover);
                     }
@@ -187,6 +194,63 @@ public class BoardModel extends Application {
     private boolean checkConditons(int row, int col){
         if(!(isInsideBoard(row, col))) return true;
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
+    }
+
+    private void saveSnowmanToFile(int row, int col) {
+        String fileName = generateFileName();
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
+            writeHeader(writer);
+            writeBoard(writer);
+            writeMovements(writer);
+            writeSummary(writer, row, col);
+            System.out.println("Ficheiro '" + fileName + "' guardado com sucesso.");
+        } catch (IOException e) {
+            System.err.println("Erro ao guardar o ficheiro: " + e.getMessage());
+        }
+    }
+
+    private String generateFileName() {
+        LocalDateTime now = LocalDateTime.now();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
+        String formattedDate = now.format(formatter);
+        return "snowman" + formattedDate + ".txt";
+    }
+
+    private void writeHeader(BufferedWriter writer) throws IOException {
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
+        writer.write("Snowman Save Log - " + timestamp);
+        writer.newLine();
+        writer.newLine();
+    }
+
+    private void writeBoard(BufferedWriter writer) throws IOException {
+        writer.write("Mapa:");
+        writer.newLine();
+        for (List<PositionContent> line : board) {
+            for (PositionContent pc : line) {
+                writer.write(pc.toString() + " ");
+            }
+            writer.newLine();
+        }
+        writer.newLine();
+    }
+
+    private void writeMovements(BufferedWriter writer) throws IOException {
+        writer.write("Movimentos:");
+        writer.newLine();
+        for (String move : movementsHistory) {
+            writer.write(move);
+            writer.newLine();
+        }
+        writer.newLine();
+    }
+
+    private void writeSummary(BufferedWriter writer, int row, int col) throws IOException {
+        writer.write("Total de movimentos: " + movementsHistory.size());
+        writer.newLine();
+        char colLetter = (char) ('A' + col);
+        writer.write("Snowman criado em: (" + row + ", " + colLetter + ")");
+        writer.newLine();
     }
 
 
