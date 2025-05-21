@@ -94,7 +94,7 @@ public class BoardModel extends Application {
                 moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }else {
                 tryStackSnowball(snowball, direction);
-                moveMonsterTo(currentRow, currentCol, newRow, newCol);
+                if(tryStackSnowball(snowball, direction)) moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }
         }
     }
@@ -143,12 +143,12 @@ public class BoardModel extends Application {
         return null;
     }
 
-    public void tryStackSnowball(Snowball mover, Direction direction){
+    public boolean tryStackSnowball(Snowball mover, Direction direction){
         int[] next = calculateNextPositon(mover.getRow(), mover.getCol(), direction);
         int newRow = next[0];
         int newCol = next[1];
 
-        if(!isInsideBoard(newRow, newCol)) return;
+        if(!isInsideBoard(newRow, newCol)) return false;
 
         Snowball targetSnowball = getSnowballAt(newRow, newCol);
 
@@ -159,6 +159,7 @@ public class BoardModel extends Application {
                         targetSnowball.setType(SnowballType.BIG_AVERAGE);
                         snowballs.remove(mover);
                     }
+                    return true;
                 }
                 case SMALL -> {
                     if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
@@ -167,6 +168,7 @@ public class BoardModel extends Application {
                         saveSnowmanToFile(newRow, newCol);
                         snowballs.remove(targetSnowball);
                         snowballs.remove(mover);
+                        return true;
                     }
                 }
 
@@ -175,6 +177,7 @@ public class BoardModel extends Application {
                 }
             }
         }
+        return false;
     }
 
     //Helpful methods
