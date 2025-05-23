@@ -21,15 +21,17 @@ public class GameView {
     private TextArea movesArea;
     private VBox layout;
     private GridPane grid;
-    private final Image snowImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snow.jpg")));
-    private final Image grassImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/grass.jpg")));
-    private final Image blockImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/block.jpg")));
-    private final Image snowmanImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/boneco de neve.jpg")));
-    private final Image monsterImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/monstro.jpg")));
-    private final Image smallBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballSmall.jpg")));
-    private final Image avgBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballAverage.jpg")));
+    private final Image snowImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snow.png")));
+    private final Image grassImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/grass.png")));
+    private final Image blockImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/block.png")));
+    private final Image snowmanImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/boneco de neve.png")));
+    private final Image monsterImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/monster.png")));
+    private final Image smallBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballSmall.png")));
+    private final Image avgBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballAverage.png")));
     private final Image bigBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballBig.png")));
     private final Image bigAvgBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballBigAverage.png")));
+    private final Image bigSmallBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballBigSmall.png")));
+    private final Image avgSmallBallImage= new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballAverageSmall.png")));
 
 
 
@@ -80,6 +82,8 @@ public class GameView {
                 case AVERAGE -> avgBallImage;
                 case BIG -> bigBallImage;
                 case BIG_AVERAGE -> bigAvgBallImage;
+                case BIG_SMALL -> bigSmallBallImage;
+                case AVERAGE_SMALL -> avgSmallBallImage;
                 default -> null;
             };
             ImageView ballView = new ImageView(ballImg);

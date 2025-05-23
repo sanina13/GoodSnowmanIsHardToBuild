@@ -135,23 +135,31 @@ public class BoardModel extends Application {
                 moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }
         } else{
-            // se Tiver snowball
+            //separate Snowball is Composite
+            separateIfComposite(snowball, newRow, newCol, direction);
+
+            // 2. Calcula a posição seguinte
             int[] after = calculateNextPositon(newRow, newCol, direction);
-            int afterRow = after[0] , afterCol = after[1];
+            int afterRow = after[0], afterCol = after[1];
 
-            if(checkConditons(afterRow, afterCol)) return;
+            // 3. Verifica se pode continuar
+            if (checkConditons(afterRow, afterCol)) return;
 
-            Snowball snowballCheck = getSnowballAt(afterRow, afterCol); //--
+            Snowball snowballCheck = getSnowballAt(afterRow, afterCol);
 
+            // 4. Cresce a bola de neve se estiver sobre SNOW
             growSnowball(snowball, afterRow, afterCol);
 
-            if (snowballCheck == null){
+            // 5. Move ou empilha
+            if (snowballCheck == null) {
                 snowball.setPosition(afterRow, afterCol);
                 moveMonsterTo(currentRow, currentCol, newRow, newCol);
-            }else {
-                tryStackSnowball(snowball, direction);
-                if(tryStackSnowball(snowball, direction)) moveMonsterTo(currentRow, currentCol, newRow, newCol);
+            } else {
+                if (tryStackSnowball(snowball, direction)) {
+                    moveMonsterTo(currentRow, currentCol, newRow, newCol);
+                }
             }
+
         }
     }
 
@@ -228,6 +236,16 @@ public class BoardModel extends Application {
                         snowballs.remove(mover);
                         return true;
                     }
+                    else if(targetSnowball.getType() == SnowballType.AVERAGE){
+                        targetSnowball.setType(SnowballType.AVERAGE_SMALL);
+                        snowballs.remove(mover);
+                        return true;
+                    }
+                    else if(targetSnowball.getType() == SnowballType.BIG){
+                        targetSnowball.setType(SnowballType.BIG_SMALL);
+                        snowballs.remove(mover);
+                        return true;
+                    }
                 }
 
                 default -> {
@@ -245,6 +263,27 @@ public class BoardModel extends Application {
                 case AVERAGE -> snowball.setType(SnowballType.BIG);
                 default -> {}
             }
+        }
+    }
+
+    private void separateIfComposite(Snowball snowball, int row, int col, Direction direction){
+        if (snowball.getType() == SnowballType.BIG_SMALL || snowball.getType() == SnowballType.AVERAGE_SMALL) {
+            int[] afterSplit = calculateNextPositon(row, col, direction);
+            int splitRow = afterSplit[0], splitCol = afterSplit[1];
+            if (!checkConditons(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
+                SnowballType base = (snowball.getType() == SnowballType.BIG_SMALL) ? SnowballType.BIG : SnowballType.AVERAGE;
+                snowball.setType(base);
+                snowballs.add(new Snowball(splitRow, splitCol, SnowballType.SMALL));
+            }
+        }else if(snowball.getType() == SnowballType.BIG_AVERAGE){
+            int[] afterSplit = calculateNextPositon(row, col, direction);
+            int splitRow = afterSplit[0], splitCol = afterSplit[1];
+            if (!checkConditons(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
+                SnowballType big = SnowballType.BIG;
+                snowball.setType(big);
+                snowballs.add(new Snowball(splitRow, splitCol, SnowballType.AVERAGE));
+            }
+
         }
     }
 
