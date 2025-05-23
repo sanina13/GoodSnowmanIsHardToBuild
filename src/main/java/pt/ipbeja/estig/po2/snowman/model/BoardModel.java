@@ -143,17 +143,7 @@ public class BoardModel extends Application {
 
             Snowball snowballCheck = getSnowballAt(afterRow, afterCol); //--
 
-            if(board.get(afterRow).get(afterCol) == PositionContent.SNOW){
-                switch (snowball.getType()){
-                    case SMALL -> {
-                        snowball.setType(SnowballType.AVERAGE);
-                    }
-                    case AVERAGE -> {
-                        snowball.setType(SnowballType.BIG);
-                    }
-                    default -> {}
-                }
-            }
+            growSnowball(snowball, afterRow, afterCol);
 
             if (snowballCheck == null){
                 snowball.setPosition(afterRow, afterCol);
@@ -181,6 +171,8 @@ public class BoardModel extends Application {
 
 
     //Snowball Methods
+
+
 
     public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
         int[] next = calculateNextPositon(snowball.getRow(), snowball.getCol(), direction);
@@ -244,6 +236,16 @@ public class BoardModel extends Application {
             }
         }
         return false;
+    }
+
+    private void growSnowball(Snowball snowball, int row, int col){
+        if(board.get(row).get(col) == PositionContent.SNOW){
+            switch (snowball.getType()){
+                case SMALL -> snowball.setType(SnowballType.AVERAGE);
+                case AVERAGE -> snowball.setType(SnowballType.BIG);
+                default -> {}
+            }
+        }
     }
 
     //Helpful methods
