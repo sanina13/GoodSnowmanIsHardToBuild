@@ -23,9 +23,9 @@ public class BoardModel extends Application {
     private List<String> movementsHistory;
     public static final int ROWS = 10;
     public static final int COLS = 10;
+    private static int currentLevel;
 
     public BoardModel() {
-        this.monster = new Monster(4, 4);
         // JavaFX vai usar este construtor vazio, por isso não inicializamos aqui o modelo
     }
 
@@ -33,7 +33,22 @@ public class BoardModel extends Application {
         this.view = view;
     }
 
-    public void initModel() {
+    public void loadLevel(int level){
+        currentLevel = level;
+        if (movementsHistory != null) movementsHistory.clear();
+        if (board != null) board.clear();
+        if (snowballs != null) snowballs.clear();
+        switch (level){
+            case 1 -> initLevel1();
+            case 2 -> initLevel2();
+        }
+        if (view != null) {
+            view.updateMovementsArea();
+            view.refreshBoard();
+        }
+    }
+
+    public void initLevel1() {
         board = new ArrayList<>();
 
         //cria Lista de Historico de movimentos
@@ -48,9 +63,9 @@ public class BoardModel extends Application {
         }
 
         // Exemplo de pos inicial
-        board.get(2).set(3, PositionContent.SNOWMAN);
+//        board.get(2).set(3, PositionContent.SNOWMAN);
         board.get(4).set(5, PositionContent.BLOCK);
-        board.get(1).set(1, PositionContent.SNOW);
+        board.get(7).set(3, PositionContent.SNOW);
 
         // Iniciar snowballs
         snowballs = new ArrayList<>();
@@ -58,6 +73,46 @@ public class BoardModel extends Application {
         snowballs.add(new Snowball(5, 6, SnowballType.AVERAGE));
         snowballs.add(new Snowball(5, 7, SnowballType.BIG_AVERAGE));
         snowballs.add(new Snowball(3, 7, SnowballType.BIG));
+
+        this.monster = new Monster(4, 4);
+    }
+
+    public void initLevel2() {
+        board = new ArrayList<>();
+
+        //cria Lista de Historico de movimentos
+        movementsHistory = new ArrayList<>();
+
+        for (int i = 0; i < ROWS; i++) {
+            List<PositionContent> row = new ArrayList<>();
+            for (int j = 0; j < COLS; j++) {
+                row.add(PositionContent.NO_SNOW);
+            }
+            board.add(row);
+        }
+
+        // Exemplo de pos inicial
+//        board.get(2).set(3, PositionContent.SNOWMAN);
+        board.get(4).set(5, PositionContent.BLOCK);
+        board.get(4).set(7, PositionContent.BLOCK);
+        board.get(7).set(6, PositionContent.BLOCK);
+        board.get(2).set(8, PositionContent.BLOCK);
+        board.get(7).set(3, PositionContent.SNOW);
+
+        // Iniciar snowballs
+        snowballs = new ArrayList<>();
+        snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
+        snowballs.add(new Snowball(5, 6, SnowballType.AVERAGE));
+        snowballs.add(new Snowball(5, 7, SnowballType.BIG_AVERAGE));
+        snowballs.add(new Snowball(3, 7, SnowballType.BIG));
+
+        this.monster = new Monster(4, 4);
+    }
+
+    public void changeLevel(){
+        currentLevel++;
+        if (currentLevel >= 2) currentLevel = 1;
+        loadLevel(currentLevel);
     }
 
     //Monster Methods
@@ -76,7 +131,6 @@ public class BoardModel extends Application {
         if (snowball == null){
             if(board.get(newRow).get(newCol) == PositionContent.SNOW){
                 snowballs.add(new Snowball(newRow, newCol, SnowballType.SMALL));
-                return;
             }else{
                 moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }
@@ -88,6 +142,18 @@ public class BoardModel extends Application {
             if(checkConditons(afterRow, afterCol)) return;
 
             Snowball snowballCheck = getSnowballAt(afterRow, afterCol); //--
+
+            if(board.get(afterRow).get(afterCol) == PositionContent.SNOW){
+                switch (snowball.getType()){
+                    case SMALL -> {
+                        snowball.setType(SnowballType.AVERAGE);
+                    }
+                    case AVERAGE -> {
+                        snowball.setType(SnowballType.BIG);
+                    }
+                    default -> {}
+                }
+            }
 
             if (snowballCheck == null){
                 snowball.setPosition(afterRow, afterCol);
@@ -158,8 +224,8 @@ public class BoardModel extends Application {
                     if(targetSnowball.getType() == SnowballType.BIG){
                         targetSnowball.setType(SnowballType.BIG_AVERAGE);
                         snowballs.remove(mover);
+                        return true;
                     }
-                    return true;
                 }
                 case SMALL -> {
                     if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
@@ -199,6 +265,7 @@ public class BoardModel extends Application {
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
     }
 
+    //save file
     private void saveSnowmanToFile(int row, int col) {
         String fileName = generateFileName();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
@@ -277,15 +344,16 @@ public class BoardModel extends Application {
     //Strat methods
     @Override
     public void start(Stage primaryStage) {
-        initModel(); // inicializa o tabuleiro
+        currentLevel = 1;
+        loadLevel(currentLevel);
 
         //Test methods
         //testMonsterToTheLeft();
-//       testCreateAverageSnowball();
-//       testCreateBigSnowball();
-//       testMaintainBigSnowball();
-//       testAverageBigSnowman();
-//       testCompleteSnowman();
+        //testCreateAverageSnowball();
+        //testCreateBigSnowball();
+        //testMaintainBigSnowball();
+        //testAverageBigSnowman();
+        //testCompleteSnowman();
 
         GameView view = new GameView(this);
         this.setView(view);
@@ -297,6 +365,14 @@ public class BoardModel extends Application {
                 case DOWN -> moveMonster(Direction.DOWN);
                 case LEFT -> moveMonster(Direction.LEFT);
                 case RIGHT -> moveMonster(Direction.RIGHT);
+
+                case L -> {
+                    // ALTERA O NIVEL DO JOGO
+                    currentLevel = (currentLevel == 1) ? 2 : 1;
+                    loadLevel(currentLevel);
+                }
+
+
                 default -> {} // ignora outras teclas
             }
         });
