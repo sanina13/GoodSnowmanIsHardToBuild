@@ -221,7 +221,7 @@ public class BoardModel extends Application {
                 }
 
                 default -> {
-                    // Outros casos que não provoca nada...
+                    // default cases
                 }
             }
         }
@@ -239,25 +239,82 @@ public class BoardModel extends Application {
     }
 
     private void separateIfComposite(Snowball snowball, int row, int col, Direction direction){
-        if (snowball.getType() == SnowballType.BIG_SMALL || snowball.getType() == SnowballType.AVERAGE_SMALL) {
-            int[] afterSplit = calculateNextPositon(row, col, direction);
-            int splitRow = afterSplit[0], splitCol = afterSplit[1];
-            if (!isBlockedOrOutOfBounds(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
-                SnowballType base = (snowball.getType() == SnowballType.BIG_SMALL) ? SnowballType.BIG : SnowballType.AVERAGE;
-                snowball.setType(base);
-                snowballs.add(new Snowball(splitRow, splitCol, SnowballType.SMALL));
-            }
-        }else if(snowball.getType() == SnowballType.BIG_AVERAGE){
-            int[] afterSplit = calculateNextPositon(row, col, direction);
-            int splitRow = afterSplit[0], splitCol = afterSplit[1];
-            if (!isBlockedOrOutOfBounds(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
-                SnowballType big = SnowballType.BIG;
-                snowball.setType(big);
-                snowballs.add(new Snowball(splitRow, splitCol, SnowballType.AVERAGE));
-            }
+        int[] afterSplit = calculateNextPositon(row, col, direction);
+        int splitRow = afterSplit[0], splitCol = afterSplit[1];
 
+        if (!isInsideBoard(splitRow, splitCol)) return;
+
+        SnowballType separatedType;
+        SnowballType baseType;
+
+        switch (snowball.getType()) {
+            case BIG_SMALL -> {
+                baseType = SnowballType.BIG;
+                separatedType = SnowballType.SMALL;
+            }
+            case AVERAGE_SMALL -> {
+                baseType = SnowballType.AVERAGE;
+                separatedType = SnowballType.SMALL;
+            }
+            case BIG_AVERAGE -> {
+                baseType = SnowballType.BIG;
+                separatedType = SnowballType.AVERAGE;
+            }
+            default -> {
+                return; // não é bola composta, sai
+            }
+        }
+
+        Snowball separated = new Snowball(splitRow, splitCol, separatedType);
+        Snowball target = getSnowballAt(splitRow, splitCol);
+
+        //FLAG SUCESS para evitar o bug de quando tryStackSnowballManual com duas empilhadas juntas
+        //ficar a bola base e desaparecer a bola de cima...
+        boolean success = false;
+
+        if (target == null) {
+            // Casa vazia → pode criar nova bola separada
+            snowballs.add(separated);
+            success = true;
+        } else {
+            // Casa ocupada → tenta empilhar automaticamente
+            success = tryStackSnowballManual(separated, target);
+        }
+
+        if(success){
+            snowball.setType(baseType);
         }
     }
+
+    private boolean tryStackSnowballManual(Snowball source, Snowball target) {
+        switch (source.getType()) {
+            case SMALL -> {
+                switch (target.getType()) {
+                    case BIG -> {
+                        target.setType(SnowballType.BIG_SMALL);
+                        return true;
+                    }
+                    case AVERAGE -> {
+                        target.setType(SnowballType.AVERAGE_SMALL);
+                        return true;
+                    }
+                    case BIG_AVERAGE -> {
+                        board.get(target.getRow()).set(target.getCol(), PositionContent.SNOWMAN);
+                        snowballs.remove(target); // limpa bolas compostas
+                        return true;
+                    }
+                }
+            }
+            case AVERAGE -> {
+                if (target.getType() == SnowballType.BIG) {
+                    target.setType(SnowballType.BIG_AVERAGE);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
 
     private void handleSnowballPush(Snowball snowball, int newRow, int newCol, Direction direction, int currentRow, int currentCol){
         //separate Snowball is Composite
