@@ -10,7 +10,6 @@ import javafx.scene.layout.VBox;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
 import pt.ipbeja.estig.po2.snowman.model.PositionContent;
 import pt.ipbeja.estig.po2.snowman.model.Snowball;
-import pt.ipbeja.estig.po2.snowman.model.SnowballType;
 
 import java.util.List;
 import java.util.Objects;
@@ -21,18 +20,17 @@ public class GameView {
     private TextArea movesArea;
     private VBox layout;
     private GridPane grid;
-    private final Image snowImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snow.png")));
-    private final Image grassImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/grass.png")));
-    private final Image blockImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/block.png")));
-    private final Image snowmanImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/boneco de neve.png")));
-    private final Image monsterImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/monster.png")));
-    private final Image smallBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballSmall.png")));
-    private final Image avgBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballAverage.png")));
-    private final Image bigBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballBig.png")));
-    private final Image bigAvgBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballBigAverage.png")));
-    private final Image bigSmallBallImage = new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballBigSmall.png")));
-    private final Image avgSmallBallImage= new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/snowballAverageSmall.png")));
-
+    private final Image snowImage         = loadImage("snow.png");
+    private final Image grassImage        = loadImage("grass.png");
+    private final Image blockImage        = loadImage("block.png");
+    private final Image snowmanImage      = loadImage("boneco de neve.png");
+    private final Image monsterImage      = loadImage("monster.png");
+    private final Image smallBallImage    = loadImage("snowballSmall.png");
+    private final Image avgBallImage      = loadImage("snowballAverage.png");
+    private final Image bigBallImage      = loadImage("snowballBig.png");
+    private final Image bigAvgBallImage   = loadImage("snowballBigAverage.png");
+    private final Image bigSmallBallImage = loadImage("snowballBigSmall.png");
+    private final Image avgSmallBallImage = loadImage("snowballAverageSmall.png");
 
 
     public GameView(BoardModel boardModel) {
@@ -84,7 +82,6 @@ public class GameView {
                 case BIG_AVERAGE -> bigAvgBallImage;
                 case BIG_SMALL -> bigSmallBallImage;
                 case AVERAGE_SMALL -> avgSmallBallImage;
-                default -> null;
             };
             ImageView ballView = new ImageView(ballImg);
             ballView.setFitWidth(TILE_SIZE);
@@ -103,12 +100,11 @@ public class GameView {
     }
 
 
-    public TextArea createMovesArea(){
+    public void createMovesArea(){
         this.movesArea = new TextArea();
         this.movesArea.setEditable(false);
         this.movesArea.setPrefRowCount(5);
         this.movesArea.setPrefColumnCount(10);
-        return this.movesArea;
     }
 
     public VBox createContent(){
@@ -132,12 +128,30 @@ public class GameView {
         this.layout.getChildren().add(0, this.grid);
     }
 
-    public void gameWon(){
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle("You win!");
-        alert.setHeaderText(null);
-        alert.setContentText("Congratulations! You’ve built a complete snowman!");
-        alert.showAndWait();
+    public void gameWon() {
+        // Espera um ciclo de renderização para garantir que o boneco aparece
+        javafx.application.Platform.runLater(() -> {
+            Alert alert = new Alert(Alert.AlertType.INFORMATION);
+            alert.setTitle("You win!");
+            alert.setHeaderText(null);
+            if(boardModel.getCurrentLevel() == 1){
+                alert.setContentText("You’ve built a complete snowman! You will play now level 2!");
+            }else{
+                alert.setContentText("You’ve built a complete snowman! You finish the game!");
+            }
+
+            alert.showAndWait();
+
+            // Só após clicar OK e ver o boneco → espera 1s e muda de nível
+            javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
+            pause.setOnFinished(e -> boardModel.loadLevel(2)); // ou changeLevel()
+            pause.play();
+        });
+    }
+
+
+    private Image loadImage(String fileName) {
+        return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/" + fileName)));
     }
 
 }

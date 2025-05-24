@@ -110,8 +110,7 @@ public class BoardModel extends Application {
     }
 
     public void changeLevel(){
-        currentLevel++;
-        if (currentLevel >= 2) currentLevel = 1;
+        currentLevel = (currentLevel == 1) ? 2 : 1;
         loadLevel(currentLevel);
     }
 
@@ -206,6 +205,7 @@ public class BoardModel extends Application {
                         saveSnowmanToFile(newRow, newCol);
                         snowballs.remove(targetSnowball);
                         snowballs.remove(mover);
+
                         return true;
                     }
                     else if(targetSnowball.getType() == SnowballType.AVERAGE){
@@ -270,7 +270,7 @@ public class BoardModel extends Application {
 
         //FLAG SUCESS para evitar o bug de quando tryStackSnowballManual com duas empilhadas juntas
         //ficar a bola base e desaparecer a bola de cima...
-        boolean success = false;
+        boolean success;
 
         if (target == null) {
             // Casa vazia → pode criar nova bola separada
@@ -427,16 +427,16 @@ public class BoardModel extends Application {
         return board;
     }
 
-    public  List<Snowball> getSnowballs(){
-        return snowballs;
-    }
-
     public List<String> getMovementsHistory(){
         return movementsHistory;
     }
 
     public Monster getMonster(){
         return this.monster;
+    }
+
+    public int getCurrentLevel(){
+        return currentLevel;
     }
 
     //Strat method
@@ -463,14 +463,7 @@ public class BoardModel extends Application {
                 case DOWN -> moveMonster(Direction.DOWN);
                 case LEFT -> moveMonster(Direction.LEFT);
                 case RIGHT -> moveMonster(Direction.RIGHT);
-
-                case L -> {
-                    // ALTERA O NIVEL DO JOGO
-                    currentLevel = (currentLevel == 1) ? 2 : 1;
-                    loadLevel(currentLevel);
-                }
-
-
+                case L -> changeLevel();
                 default -> {} // ignora outras teclas
             }
         });
