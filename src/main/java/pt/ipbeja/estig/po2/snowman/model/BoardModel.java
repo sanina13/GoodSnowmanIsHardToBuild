@@ -116,7 +116,6 @@ public class BoardModel extends Application {
     }
 
     //Monster Methods
-
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
         int currentCol = monster.getCol();
@@ -124,7 +123,7 @@ public class BoardModel extends Application {
         int newRow = next[0];
         int newCol = next[1];
 
-        if (checkConditons(newRow, newCol)) return;
+        if (isBlockedOrOutOfBounds(newRow, newCol)) return;
 
         Snowball snowball = getSnowballAt(newRow, newCol);
 
@@ -135,31 +134,7 @@ public class BoardModel extends Application {
                 moveMonsterTo(currentRow, currentCol, newRow, newCol);
             }
         } else{
-            //separate Snowball is Composite
-            separateIfComposite(snowball, newRow, newCol, direction);
-
-            // 2. Calcula a posição seguinte
-            int[] after = calculateNextPositon(newRow, newCol, direction);
-            int afterRow = after[0], afterCol = after[1];
-
-            // 3. Verifica se pode continuar
-            if (checkConditons(afterRow, afterCol)) return;
-
-            Snowball snowballCheck = getSnowballAt(afterRow, afterCol);
-
-            // 4. Cresce a bola de neve se estiver sobre SNOW
-            growSnowball(snowball, afterRow, afterCol);
-
-            // 5. Move ou empilha
-            if (snowballCheck == null) {
-                snowball.setPosition(afterRow, afterCol);
-                moveMonsterTo(currentRow, currentCol, newRow, newCol);
-            } else {
-                if (tryStackSnowball(snowball, direction)) {
-                    moveMonsterTo(currentRow, currentCol, newRow, newCol);
-                }
-            }
-
+            handleSnowballPush(snowball, newRow, newCol, direction, currentRow, currentCol);
         }
     }
 
@@ -179,9 +154,6 @@ public class BoardModel extends Application {
 
 
     //Snowball Methods
-
-
-
     public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
         int[] next = calculateNextPositon(snowball.getRow(), snowball.getCol(), direction);
         int newRow = next[0];
@@ -270,7 +242,7 @@ public class BoardModel extends Application {
         if (snowball.getType() == SnowballType.BIG_SMALL || snowball.getType() == SnowballType.AVERAGE_SMALL) {
             int[] afterSplit = calculateNextPositon(row, col, direction);
             int splitRow = afterSplit[0], splitCol = afterSplit[1];
-            if (!checkConditons(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
+            if (!isBlockedOrOutOfBounds(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
                 SnowballType base = (snowball.getType() == SnowballType.BIG_SMALL) ? SnowballType.BIG : SnowballType.AVERAGE;
                 snowball.setType(base);
                 snowballs.add(new Snowball(splitRow, splitCol, SnowballType.SMALL));
@@ -278,12 +250,39 @@ public class BoardModel extends Application {
         }else if(snowball.getType() == SnowballType.BIG_AVERAGE){
             int[] afterSplit = calculateNextPositon(row, col, direction);
             int splitRow = afterSplit[0], splitCol = afterSplit[1];
-            if (!checkConditons(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
+            if (!isBlockedOrOutOfBounds(splitRow, splitCol) && getSnowballAt(splitRow, splitCol) == null) {
                 SnowballType big = SnowballType.BIG;
                 snowball.setType(big);
                 snowballs.add(new Snowball(splitRow, splitCol, SnowballType.AVERAGE));
             }
 
+        }
+    }
+
+    private void handleSnowballPush(Snowball snowball, int newRow, int newCol, Direction direction, int currentRow, int currentCol){
+        //separate Snowball is Composite
+        separateIfComposite(snowball, newRow, newCol, direction);
+
+        // 2. Calcula a posição seguinte
+        int[] after = calculateNextPositon(newRow, newCol, direction);
+        int afterRow = after[0], afterCol = after[1];
+
+        // 3. Verifica se pode continuar
+        if (isBlockedOrOutOfBounds(afterRow, afterCol)) return;
+
+        Snowball snowballCheck = getSnowballAt(afterRow, afterCol);
+
+        // 4. Cresce a bola de neve se estiver sobre SNOW
+        growSnowball(snowball, afterRow, afterCol);
+
+        // 5. Move ou empilha
+        if (snowballCheck == null) {
+            snowball.setPosition(afterRow, afterCol);
+            moveMonsterTo(currentRow, currentCol, newRow, newCol);
+        } else {
+            if (tryStackSnowball(snowball, direction)) {
+                moveMonsterTo(currentRow, currentCol, newRow, newCol);
+            }
         }
     }
 
@@ -301,10 +300,11 @@ public class BoardModel extends Application {
         return row >= 0 && row < ROWS && col >= 0 && col < COLS;
     }
 
-    private boolean checkConditons(int row, int col){
+    private boolean isBlockedOrOutOfBounds(int row, int col){
         if(!(isInsideBoard(row, col))) return true;
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
     }
+
 
     //save file
     private void saveSnowmanToFile(int row, int col) {
@@ -382,7 +382,7 @@ public class BoardModel extends Application {
         return this.monster;
     }
 
-    //Strat methods
+    //Strat method
     @Override
     public void start(Stage primaryStage) {
         currentLevel = 1;
