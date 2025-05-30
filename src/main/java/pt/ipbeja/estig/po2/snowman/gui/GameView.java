@@ -1,7 +1,8 @@
 package pt.ipbeja.estig.po2.snowman.gui;
 
 
-import javafx.geometry.Pos;
+import javafx.scene.media.Media;
+import javafx.scene.media.MediaPlayer;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
@@ -10,10 +11,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import javafx.scene.paint.Color;
-import javafx.scene.text.Font;
-import javafx.scene.text.FontWeight;
-import javafx.scene.text.Text;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
 import pt.ipbeja.estig.po2.snowman.model.PositionContent;
 import pt.ipbeja.estig.po2.snowman.model.Snowball;
@@ -39,6 +36,7 @@ public class GameView {
     private final Image bigAvgBallImage   = loadImage("snowballBigAverage.png");
     private final Image bigSmallBallImage = loadImage("snowballBigSmall.png");
     private final Image avgSmallBallImage = loadImage("snowballAverageSmall.png");
+    private MediaPlayer mediaPlayer;
 
 
     public GameView(BoardModel boardModel) {
@@ -135,6 +133,7 @@ public class GameView {
         this.grid = createGridPane();
         createMovesArea();
         this.layout = new VBox(10, this.grid, this.movesArea);
+        startBackgroundMusic();
         return this.layout;
     }
 
@@ -177,5 +176,18 @@ public class GameView {
     private Image loadImage(String fileName) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/" + fileName)));
     }
+
+    private void startBackgroundMusic() {
+        if (mediaPlayer != null) {
+            mediaPlayer.stop(); // reinicia se já estiver a tocar
+        }
+
+        Media media = new Media(Objects.requireNonNull(getClass().getResource("/sound/background.mp3")).toExternalForm());
+        mediaPlayer = new MediaPlayer(media);
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // loop infinito
+        mediaPlayer.setVolume(0.2); // volume opcional
+        mediaPlayer.play();
+    }
+
 
 }
