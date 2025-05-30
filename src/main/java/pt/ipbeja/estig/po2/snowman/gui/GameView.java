@@ -1,15 +1,23 @@
 package pt.ipbeja.estig.po2.snowman.gui;
 
+
+import javafx.geometry.Pos;
 import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontWeight;
+import javafx.scene.text.Text;
 import pt.ipbeja.estig.po2.snowman.model.BoardModel;
 import pt.ipbeja.estig.po2.snowman.model.PositionContent;
 import pt.ipbeja.estig.po2.snowman.model.Snowball;
+import pt.ipbeja.estig.po2.snowman.model.SnowballType;
 
 import java.util.List;
 import java.util.Objects;
@@ -87,8 +95,25 @@ public class GameView {
             ballView.setFitWidth(TILE_SIZE);
             ballView.setFitHeight(TILE_SIZE);
             cell.getChildren().add(ballView);
+
+            //Label
+            Label label = new Label(getSnowballLabelText(snowball.getType()));
+            label.setStyle("-fx-text-fill: black; -fx-font-size: 9; -fx-font-weight: bold;");
+            cell.getChildren().add(label);
         }
     }
+
+    private String getSnowballLabelText(SnowballType type) {
+        return switch (type) {
+            case SMALL -> "S";
+            case AVERAGE -> "A";
+            case BIG -> "B";
+            case BIG_AVERAGE -> "B+A";
+            case BIG_SMALL -> "B+S";
+            case AVERAGE_SMALL -> "A+S";
+        };
+    }
+
 
     private void addMonsterIfPresent(StackPane cell, int row, int col) {
         if (boardModel.getMonster().getRow() == row && boardModel.getMonster().getCol() == col) {
@@ -98,7 +123,6 @@ public class GameView {
             cell.getChildren().add(monsterView);
         }
     }
-
 
     public void createMovesArea(){
         this.movesArea = new TextArea();
