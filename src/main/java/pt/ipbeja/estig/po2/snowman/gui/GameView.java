@@ -1,6 +1,8 @@
 package pt.ipbeja.estig.po2.snowman.gui;
 
 
+import javafx.scene.control.TextInputDialog;
+import javafx.scene.layout.HBox;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
 import javafx.scene.control.Alert;
@@ -11,11 +13,9 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
-import pt.ipbeja.estig.po2.snowman.model.BoardModel;
-import pt.ipbeja.estig.po2.snowman.model.PositionContent;
-import pt.ipbeja.estig.po2.snowman.model.Snowball;
-import pt.ipbeja.estig.po2.snowman.model.SnowballType;
+import pt.ipbeja.estig.po2.snowman.model.*;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
@@ -25,6 +25,7 @@ public class GameView {
     private TextArea movesArea;
     private VBox layout;
     private GridPane grid;
+    private TextArea scoresArea;
     private final Image snowImage         = loadImage("snow.png");
     private final Image grassImage        = loadImage("grass.png");
     private final Image blockImage        = loadImage("block.png");
@@ -129,13 +130,47 @@ public class GameView {
         this.movesArea.setPrefColumnCount(10);
     }
 
-    public VBox createContent(){
+    public TextArea createScoresArea() {
+        this.scoresArea = new TextArea();
+        this.scoresArea.setEditable(false);
+        this.scoresArea.setPrefRowCount(5);
+        this.scoresArea.setPrefColumnCount(15);
+        this.scoresArea.setStyle("-fx-font-size: 11; -fx-font-weight: bold;");
+        return this.scoresArea;
+    }
+
+
+    public VBox createContent() {
+        askPlayerName(); // NAME ASK
+
         this.grid = createGridPane();
         createMovesArea();
-        this.layout = new VBox(10, this.grid, this.movesArea);
-        startBackgroundMusic();
+        createScoresArea();
+
+        GridPane gridWithScores = new GridPane();
+        gridWithScores.add(grid, 0, 0);        // coluna 0: grid
+        gridWithScores.add(scoresArea, 1, 0);  // coluna 1: scores à direita
+        gridWithScores.setHgap(20);
+
+        this.layout = new VBox(10, gridWithScores, movesArea);
         return this.layout;
     }
+
+    private void askPlayerName() {
+        TextInputDialog dialog = new TextInputDialog();
+        dialog.setTitle("Nome do Jogador");
+        dialog.setHeaderText("Bem-vindo ao Snowman!");
+        dialog.setContentText("Insere o teu nome (máx. 3 letras):");
+
+        String playerName = dialog.showAndWait().orElse("AAA");
+
+        if (playerName.length() > 3) {
+            playerName = playerName.substring(0, 3);
+        }
+
+        boardModel.setPlayerName(playerName);
+    }
+
 
     public void updateMovementsArea(){
         movesArea.clear();
@@ -145,12 +180,14 @@ public class GameView {
         }
     }
 
-    public void refreshBoard(){
-        this.layout.getChildren().remove(this.grid);
-        this.grid = createGridPane();
-        this.layout.getChildren().add(0, this.grid);
+    public void refreshBoard() {
+        // Assume que grid está dentro do primeiro filho da VBox layout (que é um GridPane com grid + scoresArea)
+        if (layout.getChildren().get(0) instanceof GridPane gridWithScores) {
+            gridWithScores.getChildren().remove(this.grid);
+            this.grid = createGridPane();
+            gridWithScores.add(this.grid, 0, 0); // Reinsere na mesma posição
+        }
     }
-
     public void gameWon() {
         // Espera um ciclo de renderização para garantir que o boneco aparece
         javafx.application.Platform.runLater(() -> {
@@ -190,4 +227,17 @@ public class GameView {
     }
 
 
+    public void updateScoresArea() {
+        scoresArea.clear();
+        List<Score> topScores = boardModel.getTopScores();
+        Score last = topScores.stream()
+                .filter(s -> s.getNamePlayer().equals(boardModel.getPlayerName()))
+                .max(Comparator.comparingInt(Score::getMovCount)) // ou == lastScore
+                .orElse(null);
+
+        for (Score score : topScores) {
+            boolean isTop = score.equals(last);
+            scoresArea.appendText(score.toString() + (isTop ? " TOP" : "") + "\n");
+        }
+    }
 }

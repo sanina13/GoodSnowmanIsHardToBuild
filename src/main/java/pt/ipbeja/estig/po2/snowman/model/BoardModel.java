@@ -12,12 +12,15 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 
 
 public class BoardModel extends Application {
     private GameView view;
     private Monster monster;
+    private String playerName;
+    private final List<Score> topScores = new ArrayList<>();
     private List<List<PositionContent>> board;
     private List<Snowball> snowballs;
     private List<String> movementsHistory;
@@ -200,6 +203,7 @@ public class BoardModel extends Application {
                 }
                 case SMALL -> {
                     if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
+                        registerScore();
                         board.get(newRow).set(newCol, PositionContent.SNOWMAN);
                         view.gameWon();
                         saveSnowmanToFile(newRow, newCol);
@@ -287,6 +291,8 @@ public class BoardModel extends Application {
     }
 
     private boolean tryStackSnowballManual(Snowball source, Snowball target) {
+        int newRow = target.getRow();
+        int newCol = target.getCol();
         switch (source.getType()) {
             case SMALL -> {
                 switch (target.getType()) {
@@ -299,8 +305,11 @@ public class BoardModel extends Application {
                         return true;
                     }
                     case BIG_AVERAGE -> {
-                        board.get(target.getRow()).set(target.getCol(), PositionContent.SNOWMAN);
-                        snowballs.remove(target); // limpa bolas compostas
+                        registerScore();
+                        board.get(newRow).set(newCol, PositionContent.SNOWMAN);
+                        view.gameWon();
+                        saveSnowmanToFile(newRow, newCol);
+                        snowballs.remove(target);
                         return true;
                     }
                 }
@@ -360,6 +369,23 @@ public class BoardModel extends Application {
     private boolean isBlockedOrOutOfBounds(int row, int col){
         if(!(isInsideBoard(row, col))) return true;
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
+    }
+
+    // Scores
+
+    private void registerScore() {
+        if (playerName == null || playerName.isBlank() || movementsHistory == null) return;
+
+        Score score = new Score(playerName, currentLevel, movementsHistory.size());
+        topScores.add(score);
+        topScores.sort(Comparator.naturalOrder());
+        if (topScores.size() > 3) {
+            topScores.remove(3);
+        }
+
+        if (view != null) {
+            view.updateScoresArea();
+        }
     }
 
 
@@ -438,6 +464,27 @@ public class BoardModel extends Application {
     public int getCurrentLevel(){
         return currentLevel;
     }
+
+    public String getPlayerName() {
+        return this.playerName;
+    }
+
+    public List<Score> getTopScores() {
+        return topScores;
+    }
+
+    //setter
+
+    public void setPlayerName(String name) {
+        if (name == null || name.isBlank()) {
+            this.playerName = "AAA";
+        } else {
+            this.playerName = name.trim().toUpperCase().substring(0, Math.min(3, name.length()));
+        }
+    }
+
+
+
 
     //Strat method
     @Override
@@ -541,4 +588,6 @@ public class BoardModel extends Application {
 
         assert board.get(3).get(4) == PositionContent.SNOWMAN : "Expected Snowman got " + board.get(3).get(4);
     }
+
+
 }
