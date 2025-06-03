@@ -1,0 +1,15 @@
+Quando passa em cima da neve escolher se arrasta a neve…
+Verificar se é para guardar os jogadores que jogaram…
+
+
+Req. 10-Undo e Redo(2,0valores) Adicione a possibilidade do jogador recuar
+(undo) e avançar (redo) a jogada efetuada (repondo o estado do jogo que
+estava). Para tal, o jogo deve ir mantendo a lista de jogadas efetuadas. O
+undo e redo devem ser itens num menu. Deve ser possível fazer undo e redo
+repetidamente.
+
+Comentários Antes de cada método deve escrever um comentário javadoc(/** */)que explique oque o método faz, os respectivos parâmetros e valor devolvido (se existentes). Os comentários podem estar em português mas tente colocá-los em inglês. Os comentários têm de incluir tags @param para cada parâmetro e @return quando necessário.
+
+CRIAR METODOS PARA GERAR MELHORES MAPAS A PARTE COM MAIS OBSTACULOS ETC.…
+
+Ficheiro de Autoavaliação

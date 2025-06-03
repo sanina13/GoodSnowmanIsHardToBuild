@@ -32,6 +32,14 @@ public class BoardModel extends Application {
         // JavaFX vai usar este construtor vazio, por isso não inicializamos aqui o modelo
     }
 
+    public BoardModel(List<List<PositionContent>> board, Monster monster, List<Snowball> snowballs) {
+        this.board = board;
+        this.monster = monster;
+        this.snowballs = snowballs;
+        this.movementsHistory = new ArrayList<>();
+    }
+
+
     public void setView(GameView view){
         this.view = view;
     }
@@ -115,6 +123,19 @@ public class BoardModel extends Application {
     public void changeLevel(){
         currentLevel = (currentLevel == 1) ? 2 : 1;
         loadLevel(currentLevel);
+    }
+
+    //LevelLoader
+    public void replaceBoard(BoardModel newBoard) {
+        this.board = newBoard.getBoard();
+        this.monster = newBoard.getMonster();
+        this.snowballs = newBoard.snowballs;
+        this.movementsHistory = new ArrayList<>();
+        this.setPlayerName(newBoard.getPlayerName());
+        if (view != null) {
+            view.updateMovementsArea();
+            view.refreshBoard();
+        }
     }
 
     //Monster Methods
@@ -484,8 +505,6 @@ public class BoardModel extends Application {
     }
 
 
-
-
     //Strat method
     @Override
     public void start(Stage primaryStage) {
@@ -519,6 +538,8 @@ public class BoardModel extends Application {
         primaryStage.setScene(scene);
         primaryStage.show();
         scene.getRoot().requestFocus();
+
+        view.startBackgroundMusic();
     }
 
     public static void main(String[] args) {
@@ -588,6 +609,5 @@ public class BoardModel extends Application {
 
         assert board.get(3).get(4) == PositionContent.SNOWMAN : "Expected Snowman got " + board.get(3).get(4);
     }
-
 
 }

@@ -1,20 +1,15 @@
 package pt.ipbeja.estig.po2.snowman.gui;
 
-
-import javafx.scene.control.TextInputDialog;
-import javafx.scene.layout.HBox;
+import javafx.scene.control.*;
+import javafx.scene.image.*;
+import javafx.scene.layout.*;
 import javafx.scene.media.Media;
 import javafx.scene.media.MediaPlayer;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
-import javafx.scene.image.ImageView;
-import javafx.scene.layout.GridPane;
-import javafx.scene.layout.StackPane;
-import javafx.scene.layout.VBox;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
 import pt.ipbeja.estig.po2.snowman.model.*;
 
+import java.io.File;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
@@ -39,11 +34,9 @@ public class GameView {
     private final Image avgSmallBallImage = loadImage("snowballAverageSmall.png");
     private MediaPlayer mediaPlayer;
 
-
     public GameView(BoardModel boardModel) {
         this.boardModel = boardModel;
     }
-
 
     public GridPane createGridPane() {
         GridPane grid = new GridPane();
@@ -95,7 +88,6 @@ public class GameView {
             ballView.setFitHeight(TILE_SIZE);
             cell.getChildren().add(ballView);
 
-            //Label
             Label label = new Label(getSnowballLabelText(snowball.getType()));
             label.setStyle("-fx-text-fill: black; -fx-font-size: 9; -fx-font-weight: bold;");
             cell.getChildren().add(label);
@@ -113,7 +105,6 @@ public class GameView {
         };
     }
 
-
     private void addMonsterIfPresent(StackPane cell, int row, int col) {
         if (boardModel.getMonster().getRow() == row && boardModel.getMonster().getCol() == col) {
             ImageView monsterView = new ImageView(monsterImage);
@@ -126,33 +117,43 @@ public class GameView {
     public void createMovesArea(){
         this.movesArea = new TextArea();
         this.movesArea.setEditable(false);
+        this.movesArea.setFocusTraversable(false); // impede que ganhe foco ao clicar
         this.movesArea.setPrefRowCount(5);
         this.movesArea.setPrefColumnCount(10);
+        this.movesArea.setOnMouseClicked(e -> requestFocusBack());
     }
+
+
 
     public TextArea createScoresArea() {
         this.scoresArea = new TextArea();
         this.scoresArea.setEditable(false);
+        this.scoresArea.setFocusTraversable(false);
         this.scoresArea.setPrefRowCount(5);
         this.scoresArea.setPrefColumnCount(15);
         this.scoresArea.setStyle("-fx-font-size: 11; -fx-font-weight: bold;");
+        this.scoresArea.setOnMouseClicked(e -> requestFocusBack());
         return this.scoresArea;
     }
 
-
     public VBox createContent() {
-        askPlayerName(); // NAME ASK
+        askPlayerName();
 
         this.grid = createGridPane();
         createMovesArea();
         createScoresArea();
 
         GridPane gridWithScores = new GridPane();
-        gridWithScores.add(grid, 0, 0);        // coluna 0: grid
-        gridWithScores.add(scoresArea, 1, 0);  // coluna 1: scores à direita
+        gridWithScores.add(grid, 0, 0);
+        gridWithScores.add(scoresArea, 1, 0);
         gridWithScores.setHgap(20);
 
-        this.layout = new VBox(10, gridWithScores, movesArea);
+        Button loadLevelButton = new Button("Abrir Nível");
+        loadLevelButton.setOnAction(e -> openLevelFile(getStageFromLayout()));
+        HBox buttonBox = new HBox(10, loadLevelButton);
+        buttonBox.setStyle("-fx-padding: 10;");
+
+        this.layout = new VBox(10, gridWithScores, movesArea, buttonBox);
         return this.layout;
     }
 
@@ -171,6 +172,30 @@ public class GameView {
         boardModel.setPlayerName(playerName);
     }
 
+    private void openLevelFile(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Selecionar ficheiro de nível");
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                BoardModel novoModelo = LevelLoader.loadFromFile(file);
+                this.boardModel.replaceBoard(novoModelo);
+                this.refreshBoard();
+                this.updateMovementsArea();
+                this.updateScoresArea();
+            } catch (Exception ex) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setHeaderText("Erro ao abrir o nível");
+                alert.setContentText(ex.getMessage());
+                alert.showAndWait();
+            }
+        }
+        this.layout.getScene().getRoot().requestFocus();
+    }
+
+    private Stage getStageFromLayout() {
+        return (Stage) this.layout.getScene().getWindow();
+    }
 
     public void updateMovementsArea(){
         movesArea.clear();
@@ -181,15 +206,14 @@ public class GameView {
     }
 
     public void refreshBoard() {
-        // Assume que grid está dentro do primeiro filho da VBox layout (que é um GridPane com grid + scoresArea)
         if (layout.getChildren().get(0) instanceof GridPane gridWithScores) {
             gridWithScores.getChildren().remove(this.grid);
             this.grid = createGridPane();
-            gridWithScores.add(this.grid, 0, 0); // Reinsere na mesma posição
+            gridWithScores.add(this.grid, 0, 0);
         }
     }
+
     public void gameWon() {
-        // Espera um ciclo de renderização para garantir que o boneco aparece
         javafx.application.Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("You win!");
@@ -202,42 +226,45 @@ public class GameView {
 
             alert.showAndWait();
 
-            // Só após clicar OK e ver o boneco → espera 1s e muda de nível
             javafx.animation.PauseTransition pause = new javafx.animation.PauseTransition(javafx.util.Duration.seconds(5));
-            pause.setOnFinished(e -> boardModel.loadLevel(2)); // ou changeLevel()
+            pause.setOnFinished(e -> boardModel.loadLevel(2));
             pause.play();
         });
     }
-
 
     private Image loadImage(String fileName) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/" + fileName)));
     }
 
-    private void startBackgroundMusic() {
+    public void startBackgroundMusic() {
         if (mediaPlayer != null) {
-            mediaPlayer.stop(); // reinicia se já estiver a tocar
+            mediaPlayer.stop();
         }
 
         Media media = new Media(Objects.requireNonNull(getClass().getResource("/sound/background.mp3")).toExternalForm());
         mediaPlayer = new MediaPlayer(media);
-        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE); // loop infinito
-        mediaPlayer.setVolume(0.2); // volume opcional
+        mediaPlayer.setCycleCount(MediaPlayer.INDEFINITE);
+        mediaPlayer.setVolume(0.2);
         mediaPlayer.play();
     }
-
 
     public void updateScoresArea() {
         scoresArea.clear();
         List<Score> topScores = boardModel.getTopScores();
         Score last = topScores.stream()
                 .filter(s -> s.getNamePlayer().equals(boardModel.getPlayerName()))
-                .max(Comparator.comparingInt(Score::getMovCount)) // ou == lastScore
+                .max(Comparator.comparingInt(Score::getMovCount))
                 .orElse(null);
 
         for (Score score : topScores) {
             boolean isTop = score.equals(last);
             scoresArea.appendText(score.toString() + (isTop ? " TOP" : "") + "\n");
+        }
+    }
+
+    private void requestFocusBack() {
+        if (this.layout != null && this.layout.getScene() != null) {
+            this.layout.getScene().getRoot().requestFocus();
         }
     }
 }
