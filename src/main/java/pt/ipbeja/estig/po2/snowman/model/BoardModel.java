@@ -10,10 +10,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 
 public class BoardModel extends Application {
@@ -27,6 +24,9 @@ public class BoardModel extends Application {
     public static final int ROWS = 10;
     public static final int COLS = 10;
     private static int currentLevel;
+    private final Stack<GameState> undoStack = new Stack<>();
+    private final Stack<GameState> redoStack = new Stack<>();
+
 
     public BoardModel() {
         // JavaFX vai usar este construtor vazio, por isso não inicializamos aqui o modelo
@@ -142,6 +142,8 @@ public class BoardModel extends Application {
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
         int currentCol = monster.getCol();
+        undoStack.push(new GameState(this.board, this.snowballs, this.monster, this.movementsHistory));
+        redoStack.clear();
         int[] next = calculateNextPositon(currentRow, currentCol, direction);
         int newRow = next[0];
         int newCol = next[1];
@@ -408,6 +410,41 @@ public class BoardModel extends Application {
             view.updateScoresArea();
         }
     }
+
+    // UNDO AND REDO
+
+    public void undo(){
+        if(undoStack.isEmpty()){
+            return;
+        }
+        redoStack.push(new GameState(board, snowballs, monster, movementsHistory));
+        GameState state = undoStack.pop();
+
+        board = state.getBoard();
+        snowballs = state.getSnowballs();
+        monster = state.getMonster();
+        movementsHistory = state.getMovementsHistory();
+
+        view.refreshBoard();
+        view.updateMovementsArea();
+    }
+
+    public void redo(){
+        if(redoStack.isEmpty()){
+            return;
+        }
+        undoStack.push(new GameState(board, snowballs, monster, movementsHistory));
+        GameState state = redoStack.pop();
+
+        board = state.getBoard();
+        snowballs = state.getSnowballs();
+        monster = state.getMonster();
+        movementsHistory = state.getMovementsHistory();
+
+        view.refreshBoard();
+        view.updateMovementsArea();
+    }
+
 
 
     //save file

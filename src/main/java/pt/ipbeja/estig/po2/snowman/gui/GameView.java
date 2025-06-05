@@ -38,6 +38,10 @@ public class GameView {
         this.boardModel = boardModel;
     }
 
+    // ==============================
+    // Criação do Tabuleiro (GridPane)
+    // ==============================
+
     public GridPane createGridPane() {
         GridPane grid = new GridPane();
         List<List<PositionContent>> board = boardModel.getBoard();
@@ -52,6 +56,10 @@ public class GameView {
 
         return grid;
     }
+
+    // ==============================
+    // Criação das Células do Tabuleiro
+    // ==============================
 
     private StackPane createCell(int row, int col, PositionContent content) {
         ImageView background = switch (content) {
@@ -71,6 +79,10 @@ public class GameView {
 
         return cell;
     }
+
+    // ==============================
+    // Desenho de Bolas de Neve na Célula
+    // ==============================
 
     private void addSnowballIfPresent(StackPane cell, int row, int col) {
         Snowball snowball = boardModel.getSnowballAt(row, col);
@@ -105,6 +117,10 @@ public class GameView {
         };
     }
 
+    // ==============================
+    // Desenho do Monstro na Célula
+    // ==============================
+
     private void addMonsterIfPresent(StackPane cell, int row, int col) {
         if (boardModel.getMonster().getRow() == row && boardModel.getMonster().getCol() == col) {
             ImageView monsterView = new ImageView(monsterImage);
@@ -114,16 +130,18 @@ public class GameView {
         }
     }
 
+    // ==============================
+    // Criação das Áreas de Texto
+    // ==============================
+
     public void createMovesArea(){
         this.movesArea = new TextArea();
         this.movesArea.setEditable(false);
-        this.movesArea.setFocusTraversable(false); // impede que ganhe foco ao clicar
+        this.movesArea.setFocusTraversable(false);
         this.movesArea.setPrefRowCount(5);
         this.movesArea.setPrefColumnCount(10);
         this.movesArea.setOnMouseClicked(e -> requestFocusBack());
     }
-
-
 
     public TextArea createScoresArea() {
         this.scoresArea = new TextArea();
@@ -135,6 +153,10 @@ public class GameView {
         this.scoresArea.setOnMouseClicked(e -> requestFocusBack());
         return this.scoresArea;
     }
+
+    // ==============================
+    // Criação do Layout Principal
+    // ==============================
 
     public VBox createContent() {
         askPlayerName();
@@ -150,12 +172,29 @@ public class GameView {
 
         Button loadLevelButton = new Button("Abrir Nível");
         loadLevelButton.setOnAction(e -> openLevelFile(getStageFromLayout()));
-        HBox buttonBox = new HBox(10, loadLevelButton);
+
+        Button undoButton = new Button("Undo");
+        undoButton.setOnAction(e ->{
+                boardModel.undo();
+                requestFocusBack();
+        });
+        Button redoButton = new Button("Redo");
+        redoButton.setOnAction(e -> {
+            boardModel.redo();
+            requestFocusBack();
+        });
+
+
+        HBox buttonBox = new HBox(10, loadLevelButton, undoButton, redoButton);
         buttonBox.setStyle("-fx-padding: 10;");
 
         this.layout = new VBox(10, gridWithScores, movesArea, buttonBox);
         return this.layout;
     }
+
+    // ==============================
+    // Diálogo de Nome do Jogador
+    // ==============================
 
     private void askPlayerName() {
         TextInputDialog dialog = new TextInputDialog();
@@ -171,6 +210,10 @@ public class GameView {
 
         boardModel.setPlayerName(playerName);
     }
+
+    // ==============================
+    // Abrir Nível a partir de Ficheiro
+    // ==============================
 
     private void openLevelFile(Stage stage) {
         FileChooser fileChooser = new FileChooser();
@@ -197,6 +240,10 @@ public class GameView {
         return (Stage) this.layout.getScene().getWindow();
     }
 
+    // ==============================
+    // Atualização da Interface
+    // ==============================
+
     public void updateMovementsArea(){
         movesArea.clear();
         List<String> movsList = boardModel.getMovementsHistory();
@@ -212,6 +259,24 @@ public class GameView {
             gridWithScores.add(this.grid, 0, 0);
         }
     }
+
+    public void updateScoresArea() {
+        scoresArea.clear();
+        List<Score> topScores = boardModel.getTopScores();
+        Score last = topScores.stream()
+                .filter(s -> s.getNamePlayer().equals(boardModel.getPlayerName()))
+                .max(Comparator.comparingInt(Score::getMovCount))
+                .orElse(null);
+
+        for (Score score : topScores) {
+            boolean isTop = score.equals(last);
+            scoresArea.appendText(score.toString() + (isTop ? " TOP" : "") + "\n");
+        }
+    }
+
+    // ==============================
+    // Alerta de Vitória
+    // ==============================
 
     public void gameWon() {
         javafx.application.Platform.runLater(() -> {
@@ -232,6 +297,10 @@ public class GameView {
         });
     }
 
+    // ==============================
+    // Recursos Visuais e Som
+    // ==============================
+
     private Image loadImage(String fileName) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/" + fileName)));
     }
@@ -248,23 +317,14 @@ public class GameView {
         mediaPlayer.play();
     }
 
-    public void updateScoresArea() {
-        scoresArea.clear();
-        List<Score> topScores = boardModel.getTopScores();
-        Score last = topScores.stream()
-                .filter(s -> s.getNamePlayer().equals(boardModel.getPlayerName()))
-                .max(Comparator.comparingInt(Score::getMovCount))
-                .orElse(null);
-
-        for (Score score : topScores) {
-            boolean isTop = score.equals(last);
-            scoresArea.appendText(score.toString() + (isTop ? " TOP" : "") + "\n");
-        }
-    }
+    // ==============================
+    // Utilitário para Restaurar Foco
+    // ==============================
 
     private void requestFocusBack() {
         if (this.layout != null && this.layout.getScene() != null) {
             this.layout.getScene().getRoot().requestFocus();
         }
     }
+
 }
