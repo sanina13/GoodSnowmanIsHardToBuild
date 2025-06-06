@@ -1,0 +1,33 @@
+Autoavaliação – Projeto PO2
+
+Nome: Miguel Sanina
+N.º Aluno: 26874
+
+Nome: Tiago Sanina
+N.º Aluno: 20318
+
+Requisitos totalmente cumpridos:
+Req. 1✅
+Req. 2✅
+Req. 3✅
+Req. 4✅
+Req. 5✅
+Req. 6✅
+Req. 7✅ 
+Req. 8✅ 
+Req. 9✅ 
+Req. 10✅ 
+
+Nota proposta em autoavaliação: 17 valores
+
+Tempo investido:
+Aulas (presenciais): 0 horas
+Trabalho autónomo com apoio da AI (ChatGPT): aproximadamente 35 a 40 horas
+
+Nota: Esta indicado no código em comentário HELP WITH LLMS onde
+o código foi com total ajuda mas compreendido de forma a aprender 
+com a AI, na parte da interface GUI houve utilização não marcamos
+devido ao facto que em javaFX é um ponto onde acabamos recorrendo
+mais para pedir ajuda mas conseguimos concluir com sucesso o projeto.
+
+Total estimado: 35 a 40 horas

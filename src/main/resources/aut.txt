@@ -1,3 +1,0 @@
-Comentários Antes de cada método deve escrever um comentário javadoc(/** */)que explique oque o método faz, os respectivos parâmetros e valor devolvido (se existentes). Os comentários podem estar em português mas tente colocá-los em inglês. Os comentários têm de incluir tags @param para cada parâmetro e @return quando necessário.
-
-Ficheiro de Autoavaliação

@@ -35,7 +35,7 @@ public class BoardModel extends Application {
      * BoardModel method.
      */
     public BoardModel() {
-        // JavaFX vai usar este construtor vazio, por isso não inicializamos aqui o modelo
+       //
     }
 
     /**
@@ -84,8 +84,6 @@ public class BoardModel extends Application {
      */
     public void initLevel1() {
         board = new ArrayList<>();
-
-        //cria Lista de Historico de movimentos
         movementsHistory = new ArrayList<>();
 
         for (int i = 0; i < ROWS; i++) {
@@ -96,12 +94,9 @@ public class BoardModel extends Application {
             board.add(row);
         }
 
-        // Exemplo de pos inicial
-//        board.get(2).set(3, PositionContent.SNOWMAN);
         board.get(4).set(5, PositionContent.BLOCK);
         board.get(7).set(3, PositionContent.SNOW);
 
-        // Iniciar snowballs
         snowballs = new ArrayList<>();
         snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
         snowballs.add(new Snowball(5, 6, SnowballType.AVERAGE));
@@ -117,7 +112,6 @@ public class BoardModel extends Application {
     public void initLevel2() {
         board = new ArrayList<>();
 
-        //cria Lista de Historico de movimentos
         movementsHistory = new ArrayList<>();
 
         for (int i = 0; i < ROWS; i++) {
@@ -128,15 +122,12 @@ public class BoardModel extends Application {
             board.add(row);
         }
 
-        // Exemplo de pos inicial
-//        board.get(2).set(3, PositionContent.SNOWMAN);
         board.get(4).set(5, PositionContent.BLOCK);
         board.get(4).set(7, PositionContent.BLOCK);
         board.get(7).set(6, PositionContent.BLOCK);
         board.get(2).set(8, PositionContent.BLOCK);
         board.get(7).set(3, PositionContent.SNOW);
 
-        // Iniciar snowballs
         snowballs = new ArrayList<>();
         snowballs.add(new Snowball(3, 3, SnowballType.SMALL));
         snowballs.add(new Snowball(5, 6, SnowballType.AVERAGE));
@@ -154,7 +145,6 @@ public class BoardModel extends Application {
         loadLevel(currentLevel);
     }
 
-    //LevelLoader
     /**
      * replaceBoard method.
      * @param newBoard the newBoard
@@ -171,7 +161,6 @@ public class BoardModel extends Application {
         }
     }
 
-    //Monster Methods
     /**
      * moveMonster method.
      * @param direction the direction
@@ -209,11 +198,10 @@ public class BoardModel extends Application {
      */
     private void moveMonsterTo(int currentRow, int currentCol, int newRow, int newCol) {
         monster.setPosition(newRow, newCol);
-        char firstLetter = (char) ('A' + currentCol); // ASCI Se currentCol = 3, faz-se: 'A' + 3 = 65 + 3 = 68
+        char firstLetter = (char) ('A' + currentCol);
         char secondLetter = (char) ('A' + newCol);
         String moveResume = "(" + currentRow + ", " + firstLetter + ") -> (" + newRow + ", " + secondLetter + ")";
         movementsHistory.add(moveResume);
-        // colocar os movimentos na interface
         if (view != null) {
             view.updateMovementsArea();
             view.refreshBoard();
@@ -222,7 +210,6 @@ public class BoardModel extends Application {
     }
 
 
-    //Snowball Methods
     /**
      * growSnowballIfOnSnow method.
      * @param snowball the snowball
@@ -243,7 +230,6 @@ public class BoardModel extends Application {
             }
             snowball.setPosition(newRow, newCol);
         }
-
     }
 
     /**
@@ -267,54 +253,76 @@ public class BoardModel extends Application {
      * @param direction the direction
      * @return the result as a boolean
      */
-    public boolean tryStackSnowball(Snowball mover, Direction direction){
+    public boolean tryStackSnowball(Snowball mover, Direction direction) {
         int[] next = calculateNextPositon(mover.getRow(), mover.getCol(), direction);
         int newRow = next[0];
         int newCol = next[1];
 
-        if(!isInsideBoard(newRow, newCol)) return false;
+        if (!isInsideBoard(newRow, newCol)) return false;
 
-        Snowball targetSnowball = getSnowballAt(newRow, newCol);
+        Snowball target = getSnowballAt(newRow, newCol);
+        if (target == null) return false;
 
-        if(targetSnowball != null){
-            switch (mover.getType()){
-                case AVERAGE -> {
-                    if(targetSnowball.getType() == SnowballType.BIG){
-                        targetSnowball.setType(SnowballType.BIG_AVERAGE);
-                        snowballs.remove(mover);
-                        return true;
-                    }
-                }
-                case SMALL -> {
-                    if(targetSnowball.getType() == SnowballType.BIG_AVERAGE){
-                        registerScore();
-                        board.get(newRow).set(newCol, PositionContent.SNOWMAN);
-                        view.gameWon();
-                        saveSnowmanToFile(newRow, newCol);
-                        snowballs.remove(targetSnowball);
-                        snowballs.remove(mover);
+        return switch (mover.getType()) {
+            case AVERAGE -> tryStackAverage(mover, target);
+            case SMALL -> tryStackSmall(newRow, newCol, mover, target);
+            default -> false;
+        };
+    }
 
-                        return true;
-                    }
-                    else if(targetSnowball.getType() == SnowballType.AVERAGE){
-                        targetSnowball.setType(SnowballType.AVERAGE_SMALL);
-                        snowballs.remove(mover);
-                        return true;
-                    }
-                    else if(targetSnowball.getType() == SnowballType.BIG){
-                        targetSnowball.setType(SnowballType.BIG_SMALL);
-                        snowballs.remove(mover);
-                        return true;
-                    }
-                }
-
-                default -> {
-                    // default cases
-                }
-            }
+    /**
+     * Attempts to stack an AVERAGE snowball on a BIG one to create a BIG_AVERAGE snowball.
+     *
+     * @param mover the snowball being moved
+     * @param target the target snowball on the board
+     * @return true if stacking was successful, false otherwise
+     */
+    private boolean tryStackAverage(Snowball mover, Snowball target) {
+        if (target.getType() == SnowballType.BIG) {
+            target.setType(SnowballType.BIG_AVERAGE);
+            snowballs.remove(mover);
+            return true;
         }
         return false;
     }
+
+    /**
+     * Attempts to stack a SMALL snowball on top of another snowball.
+     * It can create AVERAGE_SMALL, BIG_SMALL, or a complete SNOWMAN.
+     *
+     * @param row the row where the target snowball is located
+     * @param col the column where the target snowball is located
+     * @param mover the SMALL snowball being moved
+     * @param target the target snowball on the board
+     * @return true if stacking was successful, false otherwise
+     */
+    private boolean tryStackSmall(int row, int col, Snowball mover, Snowball target) {
+        switch (target.getType()) {
+            case BIG_AVERAGE -> {
+                registerScore();
+                board.get(row).set(col, PositionContent.SNOWMAN);
+                view.gameWon();
+                saveSnowmanToFile(row, col);
+                snowballs.remove(target);
+                snowballs.remove(mover);
+                return true;
+            }
+            case AVERAGE -> {
+                target.setType(SnowballType.AVERAGE_SMALL);
+                snowballs.remove(mover);
+                return true;
+            }
+            case BIG -> {
+                target.setType(SnowballType.BIG_SMALL);
+                snowballs.remove(mover);
+                return true;
+            }
+            default -> {
+                return false;
+            }
+        }
+    }
+
 
     /**
      * growSnowball method.
@@ -362,23 +370,19 @@ public class BoardModel extends Application {
                 separatedType = SnowballType.AVERAGE;
             }
             default -> {
-                return; // não é bola composta, sai
+                return;
             }
         }
 
         Snowball separated = new Snowball(splitRow, splitCol, separatedType);
         Snowball target = getSnowballAt(splitRow, splitCol);
 
-        //FLAG SUCESS para evitar o bug de quando tryStackSnowballManual com duas empilhadas juntas
-        //ficar a bola base e desaparecer a bola de cima...
         boolean success;
 
         if (target == null) {
-            // Casa vazia → pode criar nova bola separada
             snowballs.add(separated);
             success = true;
         } else {
-            // Casa ocupada → tenta empilhar automaticamente
             success = tryStackSnowballManual(separated, target);
         }
 
@@ -438,22 +442,17 @@ public class BoardModel extends Application {
      * @param currentCol the currentCol
      */
     private void handleSnowballPush(Snowball snowball, int newRow, int newCol, Direction direction, int currentRow, int currentCol){
-        //separate Snowball is Composite
         separateIfComposite(snowball, newRow, newCol, direction);
 
-        // 2. Calcula a posição seguinte
         int[] after = calculateNextPositon(newRow, newCol, direction);
         int afterRow = after[0], afterCol = after[1];
 
-        // 3. Verifica se pode continuar
         if (isBlockedOrOutOfBounds(afterRow, afterCol)) return;
 
         Snowball snowballCheck = getSnowballAt(afterRow, afterCol);
 
-        // 4. Cresce a bola de neve se estiver sobre SNOW
         growSnowball(snowball, afterRow, afterCol);
 
-        // 5. Move ou empilha
         if (snowballCheck == null) {
             snowball.setPosition(afterRow, afterCol);
             moveMonsterTo(currentRow, currentCol, newRow, newCol);
@@ -464,7 +463,7 @@ public class BoardModel extends Application {
         }
     }
 
-    //Helpful methods
+
     /**
      * calculateNextPositon method.
      * @param row the row
@@ -502,7 +501,6 @@ public class BoardModel extends Application {
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
     }
 
-    // Scores
 
     /**
      * registerScore method.
@@ -522,7 +520,6 @@ public class BoardModel extends Application {
         }
     }
 
-    // UNDO AND REDO
 
     /**
      * undo method.
@@ -564,9 +561,9 @@ public class BoardModel extends Application {
 
 
 
-    //save file
+
     /**
-     * saveSnowmanToFile method.
+     * saveSnowmanToFile method. HELP WITH LLMS
      * @param row the row
      * @param col the col
      */
@@ -584,7 +581,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * generateFileName method.
+     * generateFileName method. HELP WITH LLMS
      * @return the result as a String
      */
     private String generateFileName() {
@@ -595,7 +592,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * writeHeader method.
+     * writeHeader method. HELP WITH LLMS
      * @param writer the writer
      */
     private void writeHeader(BufferedWriter writer) throws IOException {
@@ -699,7 +696,6 @@ public class BoardModel extends Application {
         return topScores;
     }
 
-    //setter
 
     /**
      * setPlayerName method.
@@ -714,7 +710,7 @@ public class BoardModel extends Application {
     }
 
 
-    //Strat method
+
     @Override
     public void start(Stage primaryStage) {
         currentLevel = 1;
@@ -739,7 +735,7 @@ public class BoardModel extends Application {
                 case LEFT -> moveMonster(Direction.LEFT);
                 case RIGHT -> moveMonster(Direction.RIGHT);
                 case L -> changeLevel();
-                default -> {} // ignora outras teclas
+                default -> {}
             }
         });
 
@@ -756,7 +752,7 @@ public class BoardModel extends Application {
      * @param args the args
      */
     public static void main(String[] args) {
-        launch(args); // chama JavaFX
+        launch(args);
     }
 
 
