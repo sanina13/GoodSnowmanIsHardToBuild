@@ -1,3 +1,6 @@
+/**
+ * Authors: Miguel Sanina (26874), Tiago Sanina (20318)
+ */
 package pt.ipbeja.estig.po2.snowman.model;
 
 import javafx.application.Application;
@@ -28,10 +31,19 @@ public class BoardModel extends Application {
     private final Stack<GameState> redoStack = new Stack<>();
 
 
+    /**
+     * BoardModel method.
+     */
     public BoardModel() {
         // JavaFX vai usar este construtor vazio, por isso não inicializamos aqui o modelo
     }
 
+    /**
+     * BoardModel method.
+     * @param board the board
+     * @param monster the monster
+     * @param snowballs the snowballs
+     */
     public BoardModel(List<List<PositionContent>> board, Monster monster, List<Snowball> snowballs) {
         this.board = board;
         this.monster = monster;
@@ -40,10 +52,18 @@ public class BoardModel extends Application {
     }
 
 
+    /**
+     * setView method.
+     * @param view the view
+     */
     public void setView(GameView view){
         this.view = view;
     }
 
+    /**
+     * loadLevel method.
+     * @param level the level
+     */
     public void loadLevel(int level){
         currentLevel = level;
         if (movementsHistory != null) movementsHistory.clear();
@@ -59,6 +79,9 @@ public class BoardModel extends Application {
         }
     }
 
+    /**
+     * initLevel1 method.
+     */
     public void initLevel1() {
         board = new ArrayList<>();
 
@@ -88,6 +111,9 @@ public class BoardModel extends Application {
         this.monster = new Monster(4, 4);
     }
 
+    /**
+     * initLevel2 method.
+     */
     public void initLevel2() {
         board = new ArrayList<>();
 
@@ -120,12 +146,19 @@ public class BoardModel extends Application {
         this.monster = new Monster(4, 4);
     }
 
+    /**
+     * changeLevel method.
+     */
     public void changeLevel(){
         currentLevel = (currentLevel == 1) ? 2 : 1;
         loadLevel(currentLevel);
     }
 
     //LevelLoader
+    /**
+     * replaceBoard method.
+     * @param newBoard the newBoard
+     */
     public void replaceBoard(BoardModel newBoard) {
         this.board = newBoard.getBoard();
         this.monster = newBoard.getMonster();
@@ -139,6 +172,10 @@ public class BoardModel extends Application {
     }
 
     //Monster Methods
+    /**
+     * moveMonster method.
+     * @param direction the direction
+     */
     public void moveMonster(Direction direction){
         int currentRow = monster.getRow();
         int currentCol = monster.getCol();
@@ -163,6 +200,13 @@ public class BoardModel extends Application {
         }
     }
 
+    /**
+     * moveMonsterTo method.
+     * @param currentRow the currentRow
+     * @param currentCol the currentCol
+     * @param newRow the newRow
+     * @param newCol the newCol
+     */
     private void moveMonsterTo(int currentRow, int currentCol, int newRow, int newCol) {
         monster.setPosition(newRow, newCol);
         char firstLetter = (char) ('A' + currentCol); // ASCI Se currentCol = 3, faz-se: 'A' + 3 = 65 + 3 = 68
@@ -179,6 +223,11 @@ public class BoardModel extends Application {
 
 
     //Snowball Methods
+    /**
+     * growSnowballIfOnSnow method.
+     * @param snowball the snowball
+     * @param direction the direction
+     */
     public void growSnowballIfOnSnow(Snowball snowball, Direction direction){
         int[] next = calculateNextPositon(snowball.getRow(), snowball.getCol(), direction);
         int newRow = next[0];
@@ -197,6 +246,12 @@ public class BoardModel extends Application {
 
     }
 
+    /**
+     * getSnowballAt method.
+     * @param row the row
+     * @param col the col
+     * @return the result as a Snowball
+     */
     public Snowball getSnowballAt(int row, int col) {
         for (Snowball s : snowballs) {
             if (s.getRow() == row && s.getCol() == col) {
@@ -206,6 +261,12 @@ public class BoardModel extends Application {
         return null;
     }
 
+    /**
+     * tryStackSnowball method.
+     * @param mover the mover
+     * @param direction the direction
+     * @return the result as a boolean
+     */
     public boolean tryStackSnowball(Snowball mover, Direction direction){
         int[] next = calculateNextPositon(mover.getRow(), mover.getCol(), direction);
         int newRow = next[0];
@@ -255,6 +316,12 @@ public class BoardModel extends Application {
         return false;
     }
 
+    /**
+     * growSnowball method.
+     * @param snowball the snowball
+     * @param row the row
+     * @param col the col
+     */
     private void growSnowball(Snowball snowball, int row, int col){
         if(board.get(row).get(col) == PositionContent.SNOW){
             switch (snowball.getType()){
@@ -265,6 +332,13 @@ public class BoardModel extends Application {
         }
     }
 
+    /**
+     * separateIfComposite method.
+     * @param snowball the snowball
+     * @param row the row
+     * @param col the col
+     * @param direction the direction
+     */
     private void separateIfComposite(Snowball snowball, int row, int col, Direction direction){
         int[] afterSplit = calculateNextPositon(row, col, direction);
         int splitRow = afterSplit[0], splitCol = afterSplit[1];
@@ -313,6 +387,12 @@ public class BoardModel extends Application {
         }
     }
 
+    /**
+     * tryStackSnowballManual method.
+     * @param source the source
+     * @param target the target
+     * @return the result as a boolean
+     */
     private boolean tryStackSnowballManual(Snowball source, Snowball target) {
         int newRow = target.getRow();
         int newCol = target.getCol();
@@ -348,6 +428,15 @@ public class BoardModel extends Application {
     }
 
 
+    /**
+     * handleSnowballPush method.
+     * @param snowball the snowball
+     * @param newRow the newRow
+     * @param newCol the newCol
+     * @param direction the direction
+     * @param currentRow the currentRow
+     * @param currentCol the currentCol
+     */
     private void handleSnowballPush(Snowball snowball, int newRow, int newCol, Direction direction, int currentRow, int currentCol){
         //separate Snowball is Composite
         separateIfComposite(snowball, newRow, newCol, direction);
@@ -376,6 +465,13 @@ public class BoardModel extends Application {
     }
 
     //Helpful methods
+    /**
+     * calculateNextPositon method.
+     * @param row the row
+     * @param col the col
+     * @param direction the direction
+     * @return the result as a int[]
+     */
     private int[] calculateNextPositon(int row, int col, Direction direction){
         return switch (direction) {
             case UP -> new int[]{row - 1, col};
@@ -385,10 +481,22 @@ public class BoardModel extends Application {
         };
     }
 
+    /**
+     * isInsideBoard method.
+     * @param row the row
+     * @param col the col
+     * @return the result as a boolean
+     */
     private boolean isInsideBoard(int row, int col){
         return row >= 0 && row < ROWS && col >= 0 && col < COLS;
     }
 
+    /**
+     * isBlockedOrOutOfBounds method.
+     * @param row the row
+     * @param col the col
+     * @return the result as a boolean
+     */
     private boolean isBlockedOrOutOfBounds(int row, int col){
         if(!(isInsideBoard(row, col))) return true;
         return board.get(row).get(col) == PositionContent.BLOCK || board.get(row).get(col) == PositionContent.SNOWMAN;
@@ -396,6 +504,9 @@ public class BoardModel extends Application {
 
     // Scores
 
+    /**
+     * registerScore method.
+     */
     private void registerScore() {
         if (playerName == null || playerName.isBlank() || movementsHistory == null) return;
 
@@ -413,6 +524,9 @@ public class BoardModel extends Application {
 
     // UNDO AND REDO
 
+    /**
+     * undo method.
+     */
     public void undo(){
         if(undoStack.isEmpty()){
             return;
@@ -429,6 +543,9 @@ public class BoardModel extends Application {
         view.updateMovementsArea();
     }
 
+    /**
+     * redo method.
+     */
     public void redo(){
         if(redoStack.isEmpty()){
             return;
@@ -448,6 +565,11 @@ public class BoardModel extends Application {
 
 
     //save file
+    /**
+     * saveSnowmanToFile method.
+     * @param row the row
+     * @param col the col
+     */
     private void saveSnowmanToFile(int row, int col) {
         String fileName = generateFileName();
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(fileName))) {
@@ -461,6 +583,10 @@ public class BoardModel extends Application {
         }
     }
 
+    /**
+     * generateFileName method.
+     * @return the result as a String
+     */
     private String generateFileName() {
         LocalDateTime now = LocalDateTime.now();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
@@ -468,6 +594,10 @@ public class BoardModel extends Application {
         return "snowman" + formattedDate + ".txt";
     }
 
+    /**
+     * writeHeader method.
+     * @param writer the writer
+     */
     private void writeHeader(BufferedWriter writer) throws IOException {
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMddHHmmss"));
         writer.write("Snowman Save Log - " + timestamp);
@@ -475,6 +605,10 @@ public class BoardModel extends Application {
         writer.newLine();
     }
 
+    /**
+     * writeBoard method.
+     * @param writer the writer
+     */
     private void writeBoard(BufferedWriter writer) throws IOException {
         writer.write("Mapa:");
         writer.newLine();
@@ -487,6 +621,10 @@ public class BoardModel extends Application {
         writer.newLine();
     }
 
+    /**
+     * writeMovements method.
+     * @param writer the writer
+     */
     private void writeMovements(BufferedWriter writer) throws IOException {
         writer.write("Movimentos:");
         writer.newLine();
@@ -497,6 +635,12 @@ public class BoardModel extends Application {
         writer.newLine();
     }
 
+    /**
+     * writeSummary method.
+     * @param writer the writer
+     * @param row the row
+     * @param col the col
+     */
     private void writeSummary(BufferedWriter writer, int row, int col) throws IOException {
         writer.write("Total de movimentos: " + movementsHistory.size());
         writer.newLine();
@@ -507,32 +651,60 @@ public class BoardModel extends Application {
 
 
     //getters
+    /**
+     * getBoard method.
+     * @return the result as a List<List<PositionContent>>
+     */
     public List<List<PositionContent>> getBoard() {
         return board;
     }
 
+    /**
+     * getMovementsHistory method.
+     * @return the result as a List<String>
+     */
     public List<String> getMovementsHistory(){
         return movementsHistory;
     }
 
+    /**
+     * getMonster method.
+     * @return the result as a Monster
+     */
     public Monster getMonster(){
         return this.monster;
     }
 
+    /**
+     * getCurrentLevel method.
+     * @return the result as a int
+     */
     public int getCurrentLevel(){
         return currentLevel;
     }
 
+    /**
+     * getPlayerName method.
+     * @return the result as a String
+     */
     public String getPlayerName() {
         return this.playerName;
     }
 
+    /**
+     * getTopScores method.
+     * @return the result as a List<Score>
+     */
     public List<Score> getTopScores() {
         return topScores;
     }
 
     //setter
 
+    /**
+     * setPlayerName method.
+     * @param name the name
+     */
     public void setPlayerName(String name) {
         if (name == null || name.isBlank()) {
             this.playerName = "AAA";
@@ -579,13 +751,16 @@ public class BoardModel extends Application {
         view.startBackgroundMusic();
     }
 
+    /**
+     * main method.
+     * @param args the args
+     */
     public static void main(String[] args) {
         launch(args); // chama JavaFX
     }
 
 
     //Tests
-
     void testMonsterToTheLeft(){
         this.monster.setPosition(4, 4);
         moveMonster(Direction.LEFT);

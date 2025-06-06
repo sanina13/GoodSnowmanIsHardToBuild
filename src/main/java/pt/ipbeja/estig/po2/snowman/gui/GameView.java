@@ -1,3 +1,6 @@
+/**
+ * Authors: Miguel Sanina (26874), Tiago Sanina (20318)
+ */
 package pt.ipbeja.estig.po2.snowman.gui;
 
 import javafx.scene.control.*;
@@ -34,14 +37,18 @@ public class GameView {
     private final Image avgSmallBallImage = loadImage("snowballAverageSmall.png");
     private MediaPlayer mediaPlayer;
 
+    /**
+     * Constructor that receives the game model.
+     * @param boardModel the game model
+     */
     public GameView(BoardModel boardModel) {
         this.boardModel = boardModel;
     }
 
-    // ==============================
-    // Criação do Tabuleiro (GridPane)
-    // ==============================
-
+    /**
+     * Creates the game board grid.
+     * @return GridPane with the board layout
+     */
     public GridPane createGridPane() {
         GridPane grid = new GridPane();
         List<List<PositionContent>> board = boardModel.getBoard();
@@ -57,10 +64,13 @@ public class GameView {
         return grid;
     }
 
-    // ==============================
-    // Criação das Células do Tabuleiro
-    // ==============================
-
+    /**
+     * Creates a cell with the correct image and contents.
+     * @param row the row position
+     * @param col the column position
+     * @param content the type of position content
+     * @return the created StackPane cell
+     */
     private StackPane createCell(int row, int col, PositionContent content) {
         ImageView background = switch (content) {
             case NO_SNOW -> new ImageView(grassImage);
@@ -80,10 +90,12 @@ public class GameView {
         return cell;
     }
 
-    // ==============================
-    // Desenho de Bolas de Neve na Célula
-    // ==============================
-
+    /**
+     * Adds a snowball to a cell if one exists at that position.
+     * @param cell the StackPane cell
+     * @param row the row index
+     * @param col the column index
+     */
     private void addSnowballIfPresent(StackPane cell, int row, int col) {
         Snowball snowball = boardModel.getSnowballAt(row, col);
         if (snowball != null) {
@@ -106,6 +118,11 @@ public class GameView {
         }
     }
 
+    /**
+     * Returns a label text for a snowball type.
+     * @param type the SnowballType
+     * @return short label string
+     */
     private String getSnowballLabelText(SnowballType type) {
         return switch (type) {
             case SMALL -> "S";
@@ -117,10 +134,12 @@ public class GameView {
         };
     }
 
-    // ==============================
-    // Desenho do Monstro na Célula
-    // ==============================
-
+    /**
+     * Adds the monster image to a cell if it's in the given position.
+     * @param cell the StackPane cell
+     * @param row the row index
+     * @param col the column index
+     */
     private void addMonsterIfPresent(StackPane cell, int row, int col) {
         if (boardModel.getMonster().getRow() == row && boardModel.getMonster().getCol() == col) {
             ImageView monsterView = new ImageView(monsterImage);
@@ -130,10 +149,9 @@ public class GameView {
         }
     }
 
-    // ==============================
-    // Criação das Áreas de Texto
-    // ==============================
-
+    /**
+     * Creates the text area for displaying movements.
+     */
     public void createMovesArea(){
         this.movesArea = new TextArea();
         this.movesArea.setEditable(false);
@@ -143,7 +161,10 @@ public class GameView {
         this.movesArea.setOnMouseClicked(e -> requestFocusBack());
     }
 
-    public TextArea createScoresArea() {
+    /**
+     * Creates the text area for displaying scores.
+     */
+    public void createScoresArea() {
         this.scoresArea = new TextArea();
         this.scoresArea.setEditable(false);
         this.scoresArea.setFocusTraversable(false);
@@ -151,13 +172,12 @@ public class GameView {
         this.scoresArea.setPrefColumnCount(15);
         this.scoresArea.setStyle("-fx-font-size: 11; -fx-font-weight: bold;");
         this.scoresArea.setOnMouseClicked(e -> requestFocusBack());
-        return this.scoresArea;
     }
 
-    // ==============================
-    // Criação do Layout Principal
-    // ==============================
-
+    /**
+     * Creates and returns the main VBox layout of the game screen.
+     * @return the complete VBox layout
+     */
     public VBox createContent() {
         askPlayerName();
 
@@ -175,15 +195,14 @@ public class GameView {
 
         Button undoButton = new Button("Undo");
         undoButton.setOnAction(e ->{
-                boardModel.undo();
-                requestFocusBack();
+            boardModel.undo();
+            requestFocusBack();
         });
         Button redoButton = new Button("Redo");
         redoButton.setOnAction(e -> {
             boardModel.redo();
             requestFocusBack();
         });
-
 
         HBox buttonBox = new HBox(10, loadLevelButton, undoButton, redoButton);
         buttonBox.setStyle("-fx-padding: 10;");
@@ -192,10 +211,9 @@ public class GameView {
         return this.layout;
     }
 
-    // ==============================
-    // Diálogo de Nome do Jogador
-    // ==============================
-
+    /**
+     * Asks the player to input their name at game start.
+     */
     private void askPlayerName() {
         TextInputDialog dialog = new TextInputDialog();
         dialog.setTitle("Nome do Jogador");
@@ -211,10 +229,10 @@ public class GameView {
         boardModel.setPlayerName(playerName);
     }
 
-    // ==============================
-    // Abrir Nível a partir de Ficheiro
-    // ==============================
-
+    /**
+     * Opens a level file and loads its content.
+     * @param stage the current JavaFX stage
+     */
     private void openLevelFile(Stage stage) {
         FileChooser fileChooser = new FileChooser();
         fileChooser.setTitle("Selecionar ficheiro de nível");
@@ -236,14 +254,17 @@ public class GameView {
         this.layout.getScene().getRoot().requestFocus();
     }
 
+    /**
+     * Gets the stage from the layout.
+     * @return the JavaFX stage
+     */
     private Stage getStageFromLayout() {
         return (Stage) this.layout.getScene().getWindow();
     }
 
-    // ==============================
-    // Atualização da Interface
-    // ==============================
-
+    /**
+     * Updates the movements text area with the move history.
+     */
     public void updateMovementsArea(){
         movesArea.clear();
         List<String> movsList = boardModel.getMovementsHistory();
@@ -252,6 +273,9 @@ public class GameView {
         }
     }
 
+    /**
+     * Refreshes the board view.
+     */
     public void refreshBoard() {
         if (layout.getChildren().get(0) instanceof GridPane gridWithScores) {
             gridWithScores.getChildren().remove(this.grid);
@@ -260,6 +284,9 @@ public class GameView {
         }
     }
 
+    /**
+     * Updates the scores area with current top scores.
+     */
     public void updateScoresArea() {
         scoresArea.clear();
         List<Score> topScores = boardModel.getTopScores();
@@ -270,14 +297,13 @@ public class GameView {
 
         for (Score score : topScores) {
             boolean isTop = score.equals(last);
-            scoresArea.appendText(score.toString() + (isTop ? " TOP" : "") + "\n");
+            scoresArea.appendText(score + (isTop ? " TOP" : "") + "\n");
         }
     }
 
-    // ==============================
-    // Alerta de Vitória
-    // ==============================
-
+    /**
+     * Shows a win message and advances the game.
+     */
     public void gameWon() {
         javafx.application.Platform.runLater(() -> {
             Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -297,14 +323,18 @@ public class GameView {
         });
     }
 
-    // ==============================
-    // Recursos Visuais e Som
-    // ==============================
-
+    /**
+     * Loads an image from the resources.
+     * @param fileName the image file name
+     * @return the Image object
+     */
     private Image loadImage(String fileName) {
         return new Image(Objects.requireNonNull(getClass().getResourceAsStream("/images/" + fileName)));
     }
 
+    /**
+     * Starts background music for the game.
+     */
     public void startBackgroundMusic() {
         if (mediaPlayer != null) {
             mediaPlayer.stop();
@@ -317,14 +347,12 @@ public class GameView {
         mediaPlayer.play();
     }
 
-    // ==============================
-    // Utilitário para Restaurar Foco
-    // ==============================
-
+    /**
+     * Requests focus back to the root node.
+     */
     private void requestFocusBack() {
         if (this.layout != null && this.layout.getScene() != null) {
             this.layout.getScene().getRoot().requestFocus();
         }
     }
-
 }
