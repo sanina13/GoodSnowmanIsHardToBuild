@@ -35,7 +35,7 @@ public class BoardModel extends Application {
      * BoardModel method.
      */
     public BoardModel() {
-       //
+        //
     }
 
     /**
@@ -211,7 +211,7 @@ public class BoardModel extends Application {
 
 
     /**
-     * growSnowballIfOnSnow method.
+     * Grows the snowball if it moves into snow.
      * @param snowball the snowball
      * @param direction the direction
      */
@@ -233,7 +233,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * getSnowballAt method.
+     * Returns the snowball at a specific position.
      * @param row the row
      * @param col the col
      * @return the result as a Snowball
@@ -248,7 +248,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * tryStackSnowball method.
+     * Attempts to stack a snowball in the given direction.
      * @param mover the mover
      * @param direction the direction
      * @return the result as a boolean
@@ -325,7 +325,7 @@ public class BoardModel extends Application {
 
 
     /**
-     * growSnowball method.
+     * Grows a snowball based on the board tile.
      * @param snowball the snowball
      * @param row the row
      * @param col the col
@@ -341,7 +341,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * separateIfComposite method.
+     * Separates composite snowballs into components.
      * @param snowball the snowball
      * @param row the row
      * @param col the col
@@ -392,7 +392,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * tryStackSnowballManual method.
+     * Tries to stack a separated snowball manually.
      * @param source the source
      * @param target the target
      * @return the result as a boolean
@@ -433,7 +433,7 @@ public class BoardModel extends Application {
 
 
     /**
-     * handleSnowballPush method.
+     * Handles pushing snowballs and updates board state.
      * @param snowball the snowball
      * @param newRow the newRow
      * @param newCol the newCol
@@ -465,7 +465,7 @@ public class BoardModel extends Application {
 
 
     /**
-     * calculateNextPositon method.
+     * Calculates the next position based on direction.
      * @param row the row
      * @param col the col
      * @param direction the direction
@@ -481,7 +481,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * isInsideBoard method.
+     * Checks if position is inside the board.
      * @param row the row
      * @param col the col
      * @return the result as a boolean
@@ -491,7 +491,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * isBlockedOrOutOfBounds method.
+     * Checks if a position is blocked or invalid.
      * @param row the row
      * @param col the col
      * @return the result as a boolean
@@ -503,7 +503,7 @@ public class BoardModel extends Application {
 
 
     /**
-     * registerScore method.
+     * Registers the current score and updates the leaderboard.
      */
     private void registerScore() {
         if (playerName == null || playerName.isBlank() || movementsHistory == null) return;
@@ -522,7 +522,7 @@ public class BoardModel extends Application {
 
 
     /**
-     * undo method.
+     * Reverts the last move.
      */
     public void undo(){
         if(undoStack.isEmpty()){
@@ -541,7 +541,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * redo method.
+     * Reapplies the last undone move.
      */
     public void redo(){
         if(redoStack.isEmpty()){
@@ -619,7 +619,7 @@ public class BoardModel extends Application {
     }
 
     /**
-     * writeMovements method.
+     * writeMovements method to file.
      * @param writer the writer
      */
     private void writeMovements(BufferedWriter writer) throws IOException {
@@ -647,7 +647,7 @@ public class BoardModel extends Application {
     }
 
 
-    //getters
+
     /**
      * getBoard method.
      * @return the result as a List<List<PositionContent>>
@@ -709,20 +709,10 @@ public class BoardModel extends Application {
         }
     }
 
-
-
     @Override
     public void start(Stage primaryStage) {
         currentLevel = 1;
         loadLevel(currentLevel);
-
-        //Test methods
-        //testMonsterToTheLeft();
-        //testCreateAverageSnowball();
-        //testCreateBigSnowball();
-        //testMaintainBigSnowball();
-        //testAverageBigSnowman();
-        //testCompleteSnowman();
 
         GameView view = new GameView(this);
         this.setView(view);
@@ -754,68 +744,4 @@ public class BoardModel extends Application {
     public static void main(String[] args) {
         launch(args);
     }
-
-
-    //Tests
-    void testMonsterToTheLeft(){
-        this.monster.setPosition(4, 4);
-        moveMonster(Direction.LEFT);
-
-        assert this.monster.getCol() == 3 : "Monster didn't move to the left";
-    }
-
-    void testCreateAverageSnowball(){
-        Snowball snowball = new Snowball(3, 3, SnowballType.SMALL);
-        snowballs = new ArrayList<>();
-        snowballs.add(snowball);
-        board.get(3).set(4, PositionContent.SNOW);
-        growSnowballIfOnSnow(snowball, Direction.RIGHT);
-
-        assert  snowball.getType() == SnowballType.AVERAGE : "Expected Average got " + snowball.getType();
-    }
-
-    void testCreateBigSnowball(){
-        Snowball snowball = new Snowball(4, 4, SnowballType.AVERAGE);
-        snowballs = new ArrayList<>();
-        snowballs.add(snowball);
-        board.get(4).set(3, PositionContent.SNOW);
-        growSnowballIfOnSnow(snowball, Direction.LEFT);
-
-        assert  snowball.getType() == SnowballType.BIG : "Expected Big got " + snowball.getType();
-    }
-
-    void testMaintainBigSnowball(){
-        Snowball snowball = new Snowball(3, 3, SnowballType.BIG);
-        snowballs = new ArrayList<>();
-        snowballs.add(snowball);
-        board.get(3).set(4, PositionContent.SNOW);
-        growSnowballIfOnSnow(snowball, Direction.RIGHT);
-
-        assert  snowball.getType() == SnowballType.BIG : "Expected Big got " + snowball.getType();
-    }
-
-    void testAverageBigSnowman(){
-        Snowball snowballAvg = new Snowball(5, 5, SnowballType.AVERAGE);
-        Snowball snowballBig = new Snowball(5, 6, SnowballType.BIG);
-
-        snowballs = new ArrayList<>();
-        snowballs.addAll(Arrays.asList(snowballAvg, snowballBig));
-
-        tryStackSnowball(snowballAvg, Direction.RIGHT);
-
-        assert snowballBig.getType() == SnowballType.BIG_AVERAGE : "Expected BIG_AVERAGE got " + snowballBig.getType();
-    }
-
-    void testCompleteSnowman(){
-        Snowball snowballSmall = new Snowball(3, 3, SnowballType.SMALL);
-        Snowball snowballBigAvg = new Snowball(3, 4, SnowballType.BIG_AVERAGE);
-
-        snowballs = new ArrayList<>();
-        snowballs.addAll(Arrays.asList(snowballSmall, snowballBigAvg));
-
-        tryStackSnowball(snowballSmall, Direction.RIGHT);
-
-        assert board.get(3).get(4) == PositionContent.SNOWMAN : "Expected Snowman got " + board.get(3).get(4);
-    }
-
 }
