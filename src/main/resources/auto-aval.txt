@@ -24,10 +24,21 @@ Tempo investido:
 Aulas (presenciais): 0 horas
 Trabalho autónomo com apoio da AI (ChatGPT): aproximadamente 35 a 40 horas
 
-Nota: Esta indicado no código em comentário HELP WITH LLMS onde
-o código foi com total ajuda mas compreendido de forma a aprender 
-com a AI, na parte da interface GUI houve utilização não marcamos
+Nota: Está indicado no código em comentário "HELP WITH LLMS" onde
+o código foi com total ajuda, mas compreendido para aprender
+com a AI, na parte da ‘interface’ GUI houve utilização não marcamos
 devido ao facto que em javaFX é um ponto onde acabamos recorrendo
-mais para pedir ajuda mas conseguimos concluir com sucesso o projeto.
+mais para pedir ajuda, mas conseguimos concluir com sucesso o projeto.
+
+
+Observações adicionais:
+O desenvolvimento do projeto foi acompanhado por controlo de versões com Git começamos
+já após algum desenvolvimento do trabalho, com commits regulares ao repositório GitHub,
+permitindo registar o progresso de forma organizada e recuperar versões anteriores quando
+necessário. Esta prática contribuiu para uma melhor gestão do código e maior fiabilidade
+no processo de desenvolvimento.
+
+Link do github: https://github.com/sanina13/GoodSnowmanIsHardToBuild
+
 
 Total estimado: 35 a 40 horas
